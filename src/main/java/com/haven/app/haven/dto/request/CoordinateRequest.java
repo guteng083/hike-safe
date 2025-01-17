@@ -8,6 +8,8 @@ import lombok.*;
 @Getter
 @Builder
 public class CoordinateRequest {
+    private String trackerId;
+    private String transactionId;
     private String latitude;
     private String longitude;
 }
