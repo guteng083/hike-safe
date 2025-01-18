@@ -35,7 +35,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void webhookNotificaction(MidtransWebhookRequest request) {
-        Transactions transactions = transactionsRepository.findById(request.getTransaction_id())
+        Transactions transactions = transactionsRepository.findById(request.getOrder_id())
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         Payment payment = Payment.builder()
