@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -34,14 +34,17 @@ public class Transactions {
     private TransactionStatus status;
 
     @Column(name = "total_amount")
-    private double TotalAmount;
+    private Double totalAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tracker_id")
     private TrackerDevices trackerId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "transactionId")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "transactionId")
     private List<Ticket> tickets;
+
+    @OneToMany(mappedBy = "transactionId")
+    private List<Coordinate> coordinates;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -53,6 +56,9 @@ public class Transactions {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = TransactionStatus.PENDING;
+        trackerId = null;
+        coordinates = new ArrayList<>();
     }
 
     @PreUpdate
