@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface TrackerDevicesRepository extends JpaRepository<TrackerDevices, UUID> {
+public interface TrackerDevicesRepository extends JpaRepository<TrackerDevices, String> {
 //    TrackerDevices findBySerialNumber(String serialNumber);
 }

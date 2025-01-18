@@ -9,11 +9,13 @@ import lombok.*;
 @Getter
 @Builder
 public class TrackerDevicesResponse {
+    private String id;
     private String SerialNumber;
     private String status;
 
     public static TrackerDevicesResponse trackerDevicesToTrackerDevicesResponse(TrackerDevices trackerDevices) {
         return TrackerDevicesResponse.builder()
+                .id(trackerDevices.getId())
                 .SerialNumber(trackerDevices.getSerialNumber())
                 .status(trackerDevices.getStatus().toString())
                 .build();
