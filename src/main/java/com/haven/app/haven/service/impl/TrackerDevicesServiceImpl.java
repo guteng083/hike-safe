@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
     @Override
     public TrackerDevicesResponse createTracker(TrackerDevicesRequest trackerDevicesRequest) {
         TrackerDevices trackerDevices = TrackerDevices.builder()
-                .SerialNumber(trackerDevicesRequest.getSerialNumber())
+                .serialNumber(trackerDevicesRequest.getSerialNumber())
                 .build();
 
         trackerDevicesRepository.saveAndFlush(trackerDevices);
@@ -44,7 +43,7 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
 
     @Override
     public TrackerDevices getOne(String id) {
-        return trackerDevicesRepository.findById(UUID.fromString(id)).orElse(null);
+        return trackerDevicesRepository.findById(id).orElse(null);
     }
 
     @Override

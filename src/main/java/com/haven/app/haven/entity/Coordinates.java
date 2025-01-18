@@ -3,10 +3,8 @@ package com.haven.app.haven.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,18 +13,18 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "coordinate")
-public class Coordinate {
+public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "tracker_id", nullable = false)
-    private TrackerDevices trackerId;
+    private TrackerDevices tracker;
 
     @ManyToOne
     @JoinColumn(name = "transaction_id", nullable = false)
-    private Transactions transactionId;
+    private Transactions transaction;
 
     @Column(nullable = false)
     private String longitude;
@@ -35,6 +33,10 @@ public class Coordinate {
     private String latitude;
 
     @CreationTimestamp
-//    @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @PreUpdate
+    private void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
