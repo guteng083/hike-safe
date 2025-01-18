@@ -31,6 +31,9 @@ public class Payment {
     private String status;
 
     @Column(nullable = false)
+    private String orderId;
+
+    @Column(nullable = false)
     private LocalDateTime settlementTime;
 
     @Column(nullable = false)

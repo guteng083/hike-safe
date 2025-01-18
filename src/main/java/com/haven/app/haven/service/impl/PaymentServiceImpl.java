@@ -1,5 +1,6 @@
 package com.haven.app.haven.service.impl;
 
+import com.haven.app.haven.constant.TransactionStatus;
 import com.haven.app.haven.dto.request.MidtransCustomerDetails;
 import com.haven.app.haven.dto.request.MidtransPaymentLinkRequest;
 import com.haven.app.haven.dto.request.MidtransTransactionDetailsRequest;
@@ -35,9 +36,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void webhookNotificaction(MidtransWebhookRequest request) {
-        System.out.println("Webhook Notification: " + request);
-        System.out.println("Order ID: " + request.getOrder_id());
-        Transactions transactions = transactionsRepository.findById(request.getOrder_id())
+        String orderId = extractUUID(request.getOrder_id());
+        Transactions transactions = transactionsRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         Payment payment = Payment.builder()
@@ -46,9 +46,13 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentMethod(request.getPayment_type())
                 .amount(Double.parseDouble(request.getGross_amount()))
                 .status(request.getTransaction_status())
-                .midtransOrderId(request.getOrder_id())
+                .orderId(request.getOrder_id())
+                .midtransOrderId(request.getTransaction_id())
                 .fraudStatus(request.getFraud_status())
                 .build();
+
+        transactions.setStatus(TransactionStatus.BOOKED);
+        transactionsRepository.save(transactions);
 
         paymentRepository.save(payment);
     }
@@ -78,9 +82,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         RestClient restClient = RestClient.create();
 
-        System.out.println("MIDTRANS_URL: "+ MIDTRANS_URL + "/v1/payment-links");
-        System.out.println("MIDTRANS_SECRET_KEY: " + MIDTRANS_SECRET_KEY);
-
         String encodedKey = Base64.getEncoder().encodeToString((MIDTRANS_SECRET_KEY + ":").getBytes());
 
         System.out.println("encodedKey: " + encodedKey);
@@ -95,6 +96,16 @@ public class PaymentServiceImpl implements PaymentService {
         if(response.getStatusCode().isError()) {
             throw new RuntimeException("Failed to create payment link");
         }
+    }
 
+    private static String extractUUID(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        int lastHyphenIndex = input.lastIndexOf('-');
+        if (lastHyphenIndex > 0) {
+            return input.substring(0, lastHyphenIndex);
+        }
+        return input;
     }
 }
