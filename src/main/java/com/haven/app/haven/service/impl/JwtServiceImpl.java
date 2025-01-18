@@ -1,8 +1,11 @@
 package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.entity.Users;
+import com.haven.app.haven.exception.AuthenticationException;
 import com.haven.app.haven.service.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -34,13 +37,22 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String extractEmail(String jwtToken) {
-       return extractClaim(jwtToken, Claims::getSubject);
+        try {
+            return extractClaim(jwtToken, Claims::getSubject);
+        } catch (ExpiredJwtException e) {
+            throw new AuthenticationException("JWT Token expired");
+        } catch (JwtException e) {
+            throw new AuthenticationException("JWT Token invalid");
+        }
     }
 
     @Override
     public boolean validateToken(String jwtToken, UserDetails users) {
         final String username = extractEmail(jwtToken);
-        return (username.equals(users.getUsername()) && !isTokenExpired(jwtToken));
+        if (isTokenExpired(jwtToken)) {
+            throw new AuthenticationException("JWT Token expired");
+        }
+        return (username.equals(users.getUsername()));
     }
 
     public <T> T extractClaim(String jwtToken, Function<Claims,T> claimResolver) {
