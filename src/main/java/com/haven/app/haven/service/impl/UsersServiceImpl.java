@@ -1,6 +1,7 @@
 package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.entity.Users;
+import com.haven.app.haven.exception.ValidationException;
 import com.haven.app.haven.repository.UsersRepository;
 import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class UsersServiceImpl implements UsersService {
@@ -20,7 +26,9 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public Users createUser(Users users) {
         if (emailExists(users.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("email", Collections.singletonList("email already exist"));
+            throw new ValidationException("Register failed", errors);
         }
         return usersRepository.saveAndFlush(users);
     }
