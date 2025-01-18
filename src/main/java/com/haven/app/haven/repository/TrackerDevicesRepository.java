@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface TrackerDevicesRepository extends JpaRepository<TrackerDevices, UUID> {
-    TrackerDevices findBySerialNumber(String serialNumber);
+//    TrackerDevices findBySerialNumber(String serialNumber);
 }

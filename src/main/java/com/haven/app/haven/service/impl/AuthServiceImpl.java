@@ -1,6 +1,7 @@
 package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.constant.Role;
+import com.haven.app.haven.dto.request.ChangePasswordRequest;
 import com.haven.app.haven.dto.request.LoginRequest;
 import com.haven.app.haven.dto.request.RegisterRequest;
 import com.haven.app.haven.dto.response.LoginResponse;
@@ -60,6 +61,26 @@ public class AuthServiceImpl implements AuthService {
             return createLoginResponse(user);
         }
         throw new UsernameNotFoundException("Invalid email or password");
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request) {
+        Users user = usersService.getMe();
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password and confirm password don't match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        usersService.updateUser(user);
+    }
+
+    @Override
+    public LoginResponse getMe() {
+        return createLoginResponse(usersService.getMe());
     }
 
     private LoginResponse createLoginResponse(Users user) {
