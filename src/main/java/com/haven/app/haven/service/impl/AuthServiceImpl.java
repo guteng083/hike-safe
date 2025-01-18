@@ -41,7 +41,9 @@ public class AuthServiceImpl implements AuthService {
         if (secretKey.equals(secretAdminKey)) {
             usersService.createUser(createUser(request, Role.ROLE_ADMIN));
         } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("SecretKey", Collections.singletonList("SecretKey not match"));
+            throw new ValidationException("Register failed", errors);
         }
     }
 
