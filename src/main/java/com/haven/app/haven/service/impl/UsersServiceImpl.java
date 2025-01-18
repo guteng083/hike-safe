@@ -5,6 +5,8 @@ import com.haven.app.haven.repository.UsersRepository;
 import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,17 @@ public class UsersServiceImpl implements UsersService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
         return usersRepository.saveAndFlush(users);
+    }
+
+    @Override
+    public Users getMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (Users) authentication.getPrincipal();
+    }
+
+    @Override
+    public void updateUser(Users users) {
+        usersRepository.saveAndFlush(users);
     }
 
     public boolean emailExists(String email) {

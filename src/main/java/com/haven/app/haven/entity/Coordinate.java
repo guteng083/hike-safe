@@ -35,6 +35,6 @@ public class Coordinate {
     private String latitude;
 
     @CreationTimestamp
-    @UpdateTimestamp
+//    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

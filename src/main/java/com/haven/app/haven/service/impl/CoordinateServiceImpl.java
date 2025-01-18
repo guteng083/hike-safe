@@ -35,7 +35,8 @@ public class CoordinateServiceImpl implements CoordinateService {
 
     @Override
     public List<CoordinateResponse> getCoordinate(String transactionId) {
-        return List.of();
+        List<Coordinate> coordinates;
+        return null;
     }
 
 }

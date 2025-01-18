@@ -41,11 +41,11 @@ public class TrackerDevicesController {
         return ResponseEntity.ok(trackerDevicesResponse);
     }
 
-    @PatchMapping(path = "/{id}")
-    public ResponseEntity<?> updateStatusTracker(@PathVariable String id, @RequestBody TrackerDevicesStatusRequest trackerDevicesStatusRequest) {
-        TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.updateStatus(id, trackerDevicesStatusRequest);
-        return ResponseEntity.ok(trackerDevicesResponse);
-    }
+//    @PatchMapping(path = "/{id}")
+//    public ResponseEntity<?> updateStatusTracker(@PathVariable String id, @RequestBody TrackerDevicesStatusRequest trackerDevicesStatusRequest) {
+//        TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.updateStatus(id, trackerDevicesStatusRequest);
+//        return ResponseEntity.ok(trackerDevicesResponse);
+//    }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> deleteTrackerDevices(@PathVariable String id) {
