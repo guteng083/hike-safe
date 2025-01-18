@@ -1,6 +1,7 @@
 package com.haven.app.haven.controller;
 
 import com.haven.app.haven.constant.Endpoint;
+import com.haven.app.haven.dto.request.ChangePasswordRequest;
 import com.haven.app.haven.dto.request.LoginRequest;
 import com.haven.app.haven.dto.request.RegisterRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
@@ -46,5 +47,17 @@ public class AuthenticationController {
     public CommonResponseWithData<LoginResponse> Login(@RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
         return ResponseUtils.ResponseWithData("Success", response);
+    }
+
+    @PatchMapping(path = "/password/update")
+    public CommonResponse changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        authService.changePassword(changePasswordRequest);
+        return ResponseUtils.Response("Change Password Success");
+    }
+
+    @GetMapping(path = "/me")
+    public CommonResponseWithData<LoginResponse> me() {
+        LoginResponse getMe = authService.getMe();
+        return ResponseUtils.ResponseWithData("Success", getMe);
     }
 }
