@@ -11,6 +11,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_haven
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+    volumes:
+      - ./logs:/logs
 
   postgres:
     image: postgres:15-alpine
