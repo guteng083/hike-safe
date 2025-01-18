@@ -53,7 +53,7 @@ public class TransactionsResponse {
                 .status(transactions.getStatus().toString())
                 .totalAmount(transactions.getTotalAmount())
                 .tickets(ticketResponses)
-                .trackerId(transactions.getTrackerId() != null ? transactions.getTrackerId().getId().toString() : null)
+                .trackerId(transactions.getTracker() != null ? transactions.getTracker().getId() : null)
                 .createdAt(transactions.getCreatedAt().toString())
                 .updatedAt(transactions.getUpdatedAt().toString())
                 .build();

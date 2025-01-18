@@ -10,20 +10,27 @@ import lombok.*;
 @Getter
 @Builder
 @Table(name = "ticket")
-public class Ticket {
+public class Tickets {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id")
-    private Transactions transactionId;
+    private Transactions transaction;
 
     @Column(name = "hiker_name", nullable = false)
     private String hikerName;
+
+    @Column(name = "identification_number")
+    private String identificationNumber;
 
     private String address;
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prices_id")
+    private Prices prices;
 }

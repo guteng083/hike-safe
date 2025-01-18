@@ -3,6 +3,7 @@ package com.haven.app.haven.controller;
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
+import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.service.TransactionsService;
 import lombok.RequiredArgsConstructor;
@@ -19,21 +20,21 @@ public class TransactionsController {
 
     @PostMapping
     public ResponseEntity<?> createTransaction(@RequestBody TransactionsRequest transactionsRequest) {
-        TransactionsResponse transactionsResponse = transactionsService.createTransaction(transactionsRequest);
+        CommonResponseWithData<TransactionsResponse> transactionsResponse = transactionsService.createTransaction(transactionsRequest);
 
         return ResponseEntity.ok(transactionsResponse);
     }
 
     @GetMapping
     public ResponseEntity<?> getAllTransactions() {
-        List<TransactionsResponse> transactionsResponses = transactionsService.getTransactions();
+        CommonResponseWithData<List<TransactionsResponse>> transactionsResponses = transactionsService.getTransactions();
 
         return ResponseEntity.ok(transactionsResponses);
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateTransactionStatus(@PathVariable("id") String id, @RequestBody TransactionsStatusRequest request) {
-        TransactionsResponse transactionsResponse = transactionsService.updateTransactionStatus(id, request);
+        CommonResponseWithData<TransactionsResponse> transactionsResponse = transactionsService.updateTransactionStatus(id, request);
 
         return ResponseEntity.ok(transactionsResponse);
     }

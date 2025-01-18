@@ -16,10 +16,10 @@ import java.util.UUID;
 public class TrackerDevices {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @Column(nullable = false, unique = true, name = "serial_number")
-    private String SerialNumber;
+    private String serialNumber;
 
     @Enumerated(EnumType.STRING)
     private TrackerStatus status;

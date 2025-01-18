@@ -1,6 +1,6 @@
 package com.haven.app.haven.dto.response;
 
-import com.haven.app.haven.entity.Coordinate;
+import com.haven.app.haven.entity.Coordinates;
 import lombok.*;
 
 @AllArgsConstructor
@@ -16,14 +16,14 @@ public class CoordinateResponse {
     private String longitude;
     private String updatedAt;
 
-    public static CoordinateResponse CoordinateToCoordinateResponse(Coordinate coordinate) {
+    public static CoordinateResponse CoordinateToCoordinateResponse(Coordinates coordinates) {
         return CoordinateResponse.builder()
-                .id(coordinate.getId().toString())
-                .trackerId(coordinate.getTrackerId().toString())
-                .transactionId(coordinate.getTransactionId().toString())
-                .latitude(coordinate.getLatitude())
-                .longitude(coordinate.getLongitude())
-                .updatedAt(coordinate.getUpdatedAt().toString())
+                .id(coordinates.getId())
+                .trackerId(coordinates.getTracker().getId())
+                .transactionId(coordinates.getTransaction().getId())
+                .latitude(coordinates.getLatitude())
+                .longitude(coordinates.getLongitude())
+                .updatedAt(coordinates.getUpdatedAt().toString())
                 .build();
     }
 }

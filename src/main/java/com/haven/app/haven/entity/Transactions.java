@@ -4,6 +4,7 @@ import com.haven.app.haven.constant.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +26,10 @@ public class Transactions {
     private Users user;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
@@ -38,13 +39,13 @@ public class Transactions {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tracker_id")
-    private TrackerDevices trackerId;
+    private TrackerDevices tracker;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "transactionId")
-    private List<Ticket> tickets;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "transaction")
+    private List<Tickets> tickets;
 
-    @OneToMany(mappedBy = "transactionId")
-    private List<Coordinate> coordinates;
+    @OneToMany(mappedBy = "transaction")
+    private List<Coordinates> coordinates;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -57,7 +58,7 @@ public class Transactions {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         status = TransactionStatus.PENDING;
-        trackerId = null;
+        tracker = null;
         coordinates = new ArrayList<>();
     }
 
