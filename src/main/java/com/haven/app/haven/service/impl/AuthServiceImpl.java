@@ -63,6 +63,8 @@ public class AuthServiceImpl implements AuthService {
             );
 
             Users user = (Users) authentication.getPrincipal();
+            user.setAccessToken(jwtService.generateToken(user));
+            usersService.updateUser(user);
             return createLoginResponse(user);
         } catch (AuthenticationException e) {
             throw new NotFoundException("Login Failed");
@@ -103,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
                 .gender(user.getUsersDetail().getGender())
                 .address(user.getUsersDetail().getAddress())
                 .phone(user.getUsersDetail().getPhone())
-                .accessToken(jwtService.generateToken(user))
+                .accessToken(user.getAccessToken())
                 .nik(user.getUsersDetail().getNik())
                 .build();
     }
