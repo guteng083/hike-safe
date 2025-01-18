@@ -51,11 +51,11 @@ public class TransactionsServiceImpl implements TransactionsService {
         Double totalAmount = 0.0;
 
         for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
-            Prices prices = pricesRepository.findByPriceType(ticketRequest.getIdentificationType());
+//            Prices prices = pricesRepository.findByPriceType(ticketRequest.getIdentificationType());
 
-            if(prices == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price type not found");
-            }
+//            if(prices == null) {
+//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price type not found");
+//            }
 
             if(Objects.isNull(ticketRequest.getHikerName()) || ticketRequest.getHikerName().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hiker name is required");
@@ -67,10 +67,10 @@ public class TransactionsServiceImpl implements TransactionsService {
                     .identificationNumber(ticketRequest.getIdentificationNumber())
                     .address(ticketRequest.getAddress())
                     .phoneNumber(ticketRequest.getPhoneNumber())
-                    .prices(prices)
+//                    .prices(prices)
                     .build();
             tickets.add(ticket);
-            totalAmount += prices.getPrice();
+//            totalAmount += prices.getPrice();
         }
 
         ticketRepository.saveAll(tickets);
