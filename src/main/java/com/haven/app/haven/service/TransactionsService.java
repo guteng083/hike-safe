@@ -12,6 +12,8 @@ import java.util.List;
 public interface TransactionsService {
     TransactionsResponse createTransaction(TransactionsRequest request);
     Page<TransactionsResponse> getTransactions(Integer page, Integer size);
+    TransactionsResponse getTransactionById(String id);
+    List<TransactionsResponse> getTransactionByUser();
     TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request);
     Transactions getOne(String id);
     void deviceAssignment(String id, String deviceId);
