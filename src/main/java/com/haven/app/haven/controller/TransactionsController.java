@@ -50,6 +50,20 @@ public class TransactionsController {
         return ResponseUtils.responseWithPage("Get All Transactions", transactionsResponses);
     }
 
+    @GetMapping("/{id}")
+    public CommonResponseWithData<TransactionsResponse> getTransactionById(@PathVariable String id) {
+        TransactionsResponse transactionsResponse = transactionsService.getTransactionById(id);
+
+        return ResponseUtils.responseWithData("Get Transaction By Id", transactionsResponse);
+    }
+
+    @GetMapping("/user")
+    public CommonResponseWithData<List<TransactionsResponse>> getTransactionsByUserId() {
+        List<TransactionsResponse> transactionsResponses = transactionsService.getTransactionByUser();
+
+        return ResponseUtils.responseWithData("Get Transaction By User", transactionsResponses);
+    }
+
     @PatchMapping("/{id}/status")
     public CommonResponseWithData<TransactionsResponse> updateTransactionStatus(@PathVariable("id") String id, @RequestBody TransactionsStatusRequest request) {
         TransactionsResponse transactionsResponse = transactionsService.updateTransactionStatus(id, request);

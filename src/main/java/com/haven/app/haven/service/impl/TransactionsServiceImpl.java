@@ -129,6 +129,42 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
+    public TransactionsResponse getTransactionById(String id) {
+        try {
+            Transactions transactions = getOne(id);
+
+            log.info("Transactions Service: Get transaction by id successfully");
+
+            return TransactionsResponse.toTransactionResponse(transactions);
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to get transaction by id");
+        }
+    }
+
+    @Override
+    public List<TransactionsResponse> getTransactionByUser() {
+        try {
+            Users user = usersService.getMe();
+
+            List<Transactions> transactions = transactionsRepository.findByUserId(user.getId());
+
+            log.info("Transactions Service: Get transactions by user successfully");
+
+            return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to get transactions by user");
+        }
+    }
+
+    @Override
     public TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request) {
         try {
             Transactions transactions = getOne(id);
