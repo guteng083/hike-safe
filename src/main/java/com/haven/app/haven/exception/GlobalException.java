@@ -80,4 +80,52 @@ public class GlobalException {
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(CoordinateException.class)
+    public ResponseEntity<ErrorResponse> handleCoordinateException(
+            CoordinateException exception
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(exception.getMessage())
+                .error("coordinate error")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(PriceException.class)
+    public ResponseEntity<ErrorResponse> handlePriceException(
+            PriceException exception
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(exception.getMessage())
+                .error("price error")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(TrackerDeviceException.class)
+    public ResponseEntity<ErrorResponse> handleTrackerDeviceException(
+            TrackerDeviceException exception
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(exception.getMessage())
+                .error("tracker device error")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(TransactionsException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionException(
+            TransactionsException exception
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(exception.getMessage())
+                .error("transactions error")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 }

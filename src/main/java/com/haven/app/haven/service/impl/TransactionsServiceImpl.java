@@ -9,10 +9,14 @@ import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.entity.*;
+import com.haven.app.haven.exception.NotFoundException;
+import com.haven.app.haven.exception.TrackerDeviceException;
+import com.haven.app.haven.exception.TransactionsException;
 import com.haven.app.haven.repository.*;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +28,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionsServiceImpl implements TransactionsService {
     private final TransactionsRepository transactionsRepository;
     private final TicketRepository ticketRepository;
@@ -34,95 +39,185 @@ public class TransactionsServiceImpl implements TransactionsService {
 
     @Override
     public TransactionsResponse createTransaction(TransactionsRequest request) {
-        Users user = usersRepository.findById(request.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        try {
+            Users user = usersRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
 
-        LocalDate startDate = LocalDate.parse(request.getStartDate());
-        LocalDate endDate = LocalDate.parse(request.getEndDate());
-        if(endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("End date cannot be before start date");
-        }
-
-        Transactions transactions = Transactions.builder()
-                .user(user)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-
-        transactionsRepository.saveAndFlush(transactions);
-
-        List<Tickets> tickets = new ArrayList<>();
-        Double totalAmount = 0.0;
-
-        for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
-            Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
-
-            if(prices == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price type not found");
+            LocalDate startDate = LocalDate.parse(request.getStartDate());
+            LocalDate endDate = LocalDate.parse(request.getEndDate());
+            if(endDate.isBefore(startDate)) {
+                throw new IllegalArgumentException("End date cannot be before start date");
             }
 
-            if(Objects.isNull(ticketRequest.getHikerName()) || ticketRequest.getHikerName().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hiker name is required");
-            }
-
-            Tickets ticket = Tickets.builder()
-                    .transaction(transactions)
-                    .hikerName(ticketRequest.getHikerName())
-                    .identificationNumber(ticketRequest.getIdentificationNumber())
-                    .address(ticketRequest.getAddress())
-                    .phoneNumber(ticketRequest.getPhoneNumber())
-                    .prices(prices)
+            Transactions transactions = Transactions.builder()
+                    .user(user)
+                    .startDate(startDate)
+                    .endDate(endDate)
                     .build();
-            tickets.add(ticket);
-            totalAmount += prices.getPrice();
+
+            transactionsRepository.saveAndFlush(transactions);
+
+            List<Tickets> tickets = new ArrayList<>();
+            Double totalAmount = 0.0;
+
+            for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
+                Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
+
+                if(prices == null) {
+                    throw new NotFoundException("Prices not found");
+                }
+
+                if(Objects.isNull(ticketRequest.getHikerName()) || ticketRequest.getHikerName().isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hiker name is required");
+                }
+
+                Tickets ticket = Tickets.builder()
+                        .transaction(transactions)
+                        .hikerName(ticketRequest.getHikerName())
+                        .identificationNumber(ticketRequest.getIdentificationNumber())
+                        .address(ticketRequest.getAddress())
+                        .phoneNumber(ticketRequest.getPhoneNumber())
+                        .prices(prices)
+                        .build();
+                tickets.add(ticket);
+                totalAmount += prices.getPrice();
+            }
+
+            ticketRepository.saveAll(tickets);
+
+            transactions.setTotalAmount(totalAmount);
+
+            transactions = transactionsRepository.saveAndFlush(transactions);
+
+            log.info("Transactions Service: Transactions created successfully");
+
+            return TransactionsResponse.toTransactionResponse(transactions);
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to create transaction");
         }
-
-        ticketRepository.saveAll(tickets);
-
-        transactions.setTotalAmount(totalAmount);
-
-        transactions = transactionsRepository.saveAndFlush(transactions);
-
-        return TransactionsResponse.toTransactionResponse(transactions);
     }
 
     @Override
     public List<TransactionsResponse> getTransactions() {
-        List<Transactions> transactions = transactionsRepository.findAll();
+        try {
+            List<Transactions> transactions = transactionsRepository.findAll();
 
-        return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+            if(transactions.isEmpty()) {
+                throw new NotFoundException("Transactions not found");
+            }
+
+            log.info("Transactions Service: Get transactions list successfully");
+
+            return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to get transactions list");
+        }
     }
 
     @Override
     public TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request) {
-        Transactions transactions = getOne(id);
+        try {
+            Transactions transactions = getOne(id);
 
-        transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
-        transactionsRepository.saveAndFlush(transactions);
+            transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
+            transactions = transactionsRepository.saveAndFlush(transactions);
 
-        return TransactionsResponse.toTransactionResponse(transactions);
+            if (transactions.getStatus() == TransactionStatus.DONE) {
+                TrackerDevices trackerDevices = transactions.getTracker();
+                trackerDevices.setStatus(TrackerStatus.NOT_USED);
+                trackerDevicesRepository.saveAndFlush(trackerDevices);
+            }
+
+            log.info("Transactions Service: Transactions updated successfully");
+
+            return TransactionsResponse.toTransactionResponse(transactions);
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to update transactions");
+        }
+
     }
 
     @Override
     public Transactions getOne(String id) {
-        return transactionsRepository.findById(id).orElse(null);
+        try {
+            return transactionsRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Transactions not found"));
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new NotFoundException("Transactions not found");
+        }
     }
 
     @Override
     public void deviceAssignment(String id, String deviceId) {
-        Transactions transactions = getOne(id);
-        TrackerDevices trackerDevices = trackerDevicesService.getOne(deviceId);
+        try {
+            Transactions transactions = getOne(id);
 
-        transactions.setTracker(trackerDevices);
+            if((transactions.getStatus() == TransactionStatus.CANCELLED) || (transactions.getStatus() == TransactionStatus.PENDING)) {
+                throw new TransactionsException("Transactions have not booked");
+            }
 
-        trackerDevices.setStatus(TrackerStatus.USED);
+            TrackerDevices trackerDevices = trackerDevicesService.getOne(deviceId);
 
-        trackerDevicesRepository.saveAndFlush(trackerDevices);
+            if(trackerDevices.getStatus() == TrackerStatus.USED) {
+                throw new TrackerDeviceException("Tracker device already assigned");
+            }
 
-        transactionsRepository.saveAndFlush(transactions);
+            transactions.setTracker(trackerDevices);
+
+            trackerDevices.setStatus(TrackerStatus.USED);
+
+            trackerDevicesRepository.saveAndFlush(trackerDevices);
+
+            transactionsRepository.saveAndFlush(transactions);
+
+            log.info("Transactions Service: Device assign to transactions successfully");
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to assign device to transactions");
+        }
     }
 
     @Override
     public Transactions getTransactionByTracker(TrackerDevices trackerDevices) {
-        return transactionsRepository.findByTracker(trackerDevices);
+        try {
+            Transactions transactions = transactionsRepository.findByTracker(trackerDevices);
+
+            if(transactions == null) {
+                throw new NotFoundException("Transactions not found");
+            }
+
+            log.info("Transactions Service: Get transactions by tracker successfully");
+
+            return transactions;
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new NotFoundException("Transactions not found");
+        }
+    }
+
+    private static void getError(Exception e) {
+        log.error("Error Transactions Service:{}", e.getMessage());
     }
 }
