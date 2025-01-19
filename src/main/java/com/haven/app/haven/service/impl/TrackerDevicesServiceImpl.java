@@ -70,4 +70,9 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
         TrackerDevices trackerDevices = getOne(id);
         trackerDevicesRepository.delete(trackerDevices);
     }
+
+    @Override
+    public TrackerDevices getBySerialNumber(String serialNumber) {
+        return trackerDevicesRepository.findBySerialNumber(serialNumber);
+    }
 }

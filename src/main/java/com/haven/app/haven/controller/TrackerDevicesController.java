@@ -3,8 +3,11 @@ package com.haven.app.haven.controller;
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.TrackerDevicesRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesStatusRequest;
+import com.haven.app.haven.dto.response.CommonResponse;
+import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TrackerDevicesResponse;
 import com.haven.app.haven.service.TrackerDevicesService;
+import com.haven.app.haven.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,38 +21,38 @@ public class TrackerDevicesController {
     private final TrackerDevicesService trackerDevicesService;
 
     @PostMapping
-    public ResponseEntity<?> createTrackerDevices(@RequestBody TrackerDevicesRequest trackerDevicesRequest) {
+    public CommonResponseWithData<TrackerDevicesResponse> createTrackerDevices(@RequestBody TrackerDevicesRequest trackerDevicesRequest) {
         TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.createTracker(trackerDevicesRequest);
-        return ResponseEntity.ok(trackerDevicesResponse);
+        return ResponseUtils.ResponseWithData("Tracker Device Created", trackerDevicesResponse);
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllTrackerDevices() {
+    public CommonResponseWithData<List<TrackerDevicesResponse>> getAllTrackerDevices() {
         List<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices();
-        return ResponseEntity.ok(trackerDevicesResponses);
+        return ResponseUtils.ResponseWithData("Tracker Device List", trackerDevicesResponses);
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<?> getTrackerDevices(@PathVariable String id) {
+    public CommonResponseWithData<TrackerDevicesResponse> getTrackerDevices(@PathVariable String id) {
         TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.getTrackerById(id);
-        return ResponseEntity.ok(trackerDevicesResponse);
+        return ResponseUtils.ResponseWithData("Tracker Device Founded", trackerDevicesResponse);
     }
 
     @PatchMapping(path = "/{id}")
-    public ResponseEntity<?> updateTrackerDevices(@PathVariable String id, @RequestBody TrackerDevicesRequest trackerDevicesRequest) {
+    public CommonResponseWithData<TrackerDevicesResponse> updateTrackerDevices(@PathVariable String id, @RequestBody TrackerDevicesRequest trackerDevicesRequest) {
         TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.updateTracker(id, trackerDevicesRequest);
-        return ResponseEntity.ok(trackerDevicesResponse);
+        return ResponseUtils.ResponseWithData("Tracker Device Updated", trackerDevicesResponse);
     }
 
     @PatchMapping(path = "/{id}/status")
-    public ResponseEntity<?> updateStatusTracker(@PathVariable String id, @RequestBody TrackerDevicesStatusRequest trackerDevicesStatusRequest) {
+    public CommonResponseWithData<TrackerDevicesResponse> updateStatusTracker(@PathVariable String id, @RequestBody TrackerDevicesStatusRequest trackerDevicesStatusRequest) {
         TrackerDevicesResponse trackerDevicesResponse = trackerDevicesService.updateStatus(id, trackerDevicesStatusRequest);
-        return ResponseEntity.ok(trackerDevicesResponse);
+        return ResponseUtils.ResponseWithData("Tracker Device Status Updated", trackerDevicesResponse);
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<?> deleteTrackerDevices(@PathVariable String id) {
+    public CommonResponse deleteTrackerDevices(@PathVariable String id) {
         trackerDevicesService.deleteTracker(id);
-        return ResponseEntity.ok().build();
+        return ResponseUtils.Response("Tracker Device has been Deleted");
     }
 }

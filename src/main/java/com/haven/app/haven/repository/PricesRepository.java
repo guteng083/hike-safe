@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PricesRepository extends JpaRepository<Prices, String> {
-    Prices findByPriceType(String priceType);
+    Prices findByPriceType(PriceType priceType);
 }

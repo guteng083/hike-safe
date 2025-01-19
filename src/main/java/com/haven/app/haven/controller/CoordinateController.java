@@ -2,8 +2,10 @@ package com.haven.app.haven.controller;
 
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.CoordinateRequest;
+import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.CoordinateResponse;
 import com.haven.app.haven.service.CoordinateService;
+import com.haven.app.haven.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +19,15 @@ public class CoordinateController {
     private final CoordinateService coordinateService;
 
     @PostMapping
-    public ResponseEntity<?> addCoordinate(@RequestBody CoordinateRequest coordinateRequest) {
+    public CommonResponseWithData<CoordinateResponse> addCoordinate(@RequestBody CoordinateRequest coordinateRequest) {
         CoordinateResponse coordinateResponse = coordinateService.addCoordinate(coordinateRequest);
-        return ResponseEntity.ok(coordinateResponse);
+        return ResponseUtils.ResponseWithData("Coordinate added", coordinateResponse);
     }
 
     @GetMapping(path = "/{transactionId}")
-    public ResponseEntity<?> getCoordinate(@PathVariable String transactionId) {
+    public CommonResponseWithData<List<CoordinateResponse>> getCoordinate(@PathVariable String transactionId) {
         List<CoordinateResponse> coordinateResponse = coordinateService.getCoordinate(transactionId);
-        return ResponseEntity.ok(coordinateResponse);
+        return ResponseUtils.ResponseWithData("Coordinate list", coordinateResponse);
     }
 
 }

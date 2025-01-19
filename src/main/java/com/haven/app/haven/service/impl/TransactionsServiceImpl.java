@@ -1,10 +1,10 @@
 package com.haven.app.haven.service.impl;
 
+import com.haven.app.haven.constant.PriceType;
+import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
-import com.haven.app.haven.dto.response.CommonResponse;
-import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.entity.*;
 import com.haven.app.haven.repository.*;
@@ -28,16 +28,21 @@ public class TransactionsServiceImpl implements TransactionsService {
     private final UsersRepository usersRepository;
     private final PricesRepository pricesRepository;
     private final TrackerDevicesService trackerDevicesService;
+    private final TrackerDevicesRepository trackerDevicesRepository;
 
     @Override
-    public CommonResponseWithData<TransactionsResponse> createTransaction(TransactionsRequest request) {
+    public TransactionsResponse createTransaction(TransactionsRequest request) {
         Users user = usersRepository.findById(request.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         LocalDate startDate = LocalDate.parse(request.getStartDate());
         LocalDate endDate = LocalDate.parse(request.getEndDate());
+
+        System.out.println("Sampai sini ga?");
         if(endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
+
+        System.out.println("Kalo sini?");
 
         Transactions transactions = Transactions.builder()
                 .user(user)
@@ -51,7 +56,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         Double totalAmount = 0.0;
 
         for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
-            Prices prices = pricesRepository.findByPriceType(ticketRequest.getIdentificationType());
+            Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
 
             if(prices == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price type not found");
@@ -79,33 +84,24 @@ public class TransactionsServiceImpl implements TransactionsService {
 
         transactions = transactionsRepository.saveAndFlush(transactions);
 
-        return CommonResponseWithData.<TransactionsResponse>builder()
-                .message("Successfully created transaction")
-                .data(TransactionsResponse.toTransactionResponse(transactions))
-                .build();
+        return TransactionsResponse.toTransactionResponse(transactions);
     }
 
     @Override
-    public CommonResponseWithData<List<TransactionsResponse>> getTransactions() {
+    public List<TransactionsResponse> getTransactions() {
         List<Transactions> transactions = transactionsRepository.findAll();
 
-        return CommonResponseWithData.<List<TransactionsResponse>>builder()
-                .message("Successfully retrieved transactions")
-                .data(transactions.stream().map(TransactionsResponse::toTransactionResponse).toList())
-                .build();
+        return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
     }
 
     @Override
-    public CommonResponseWithData<TransactionsResponse> updateTransactionStatus(String id, TransactionsStatusRequest request) {
+    public TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request) {
         Transactions transactions = getOne(id);
 
         transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
         transactionsRepository.saveAndFlush(transactions);
 
-        return CommonResponseWithData.<TransactionsResponse>builder()
-                .message("Successfully updated transaction")
-                .data(TransactionsResponse.toTransactionResponse(transactions))
-                .build();
+        return TransactionsResponse.toTransactionResponse(transactions);
     }
 
     @Override
@@ -114,16 +110,21 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public CommonResponse deviceAssignment(String id, String deviceId) {
+    public void deviceAssignment(String id, String deviceId) {
         Transactions transactions = getOne(id);
         TrackerDevices trackerDevices = trackerDevicesService.getOne(deviceId);
 
         transactions.setTracker(trackerDevices);
 
-        transactionsRepository.saveAndFlush(transactions);
+        trackerDevices.setStatus(TrackerStatus.USED);
 
-        return CommonResponse.builder()
-                .message("Assign Tracker Device Success")
-                .build();
+        trackerDevicesRepository.saveAndFlush(trackerDevices);
+
+        transactionsRepository.saveAndFlush(transactions);
+    }
+
+    @Override
+    public Transactions getTransactionByTracker(TrackerDevices trackerDevices) {
+        return transactionsRepository.findByTracker(trackerDevices);
     }
 }

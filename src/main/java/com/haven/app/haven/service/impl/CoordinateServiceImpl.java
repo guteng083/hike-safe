@@ -23,8 +23,8 @@ public class CoordinateServiceImpl implements CoordinateService {
 
     @Override
     public CoordinateResponse addCoordinate(CoordinateRequest coordinateRequest) {
-        Transactions transactions = transactionsService.getOne(coordinateRequest.getTransactionId());
-        TrackerDevices trackerDevices = trackerDevicesService.getOne(transactions.getTracker().getId());
+        TrackerDevices trackerDevices = trackerDevicesService.getBySerialNumber(coordinateRequest.getSerialNumber());
+        Transactions transactions = transactionsService.getTransactionByTracker(trackerDevices);
 
         Coordinates coordinates = Coordinates.builder()
                 .tracker(trackerDevices)
