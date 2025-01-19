@@ -107,6 +107,7 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getUsersDetail().getPhone())
                 .accessToken(user.getAccessToken())
                 .nik(user.getUsersDetail().getNik())
+                .imageUrl(user.getUsersDetail().getImageUrl())
                 .build();
     }
 

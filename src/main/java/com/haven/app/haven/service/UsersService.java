@@ -5,6 +5,9 @@ import com.haven.app.haven.dto.response.LoginResponse;
 import com.haven.app.haven.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 public interface UsersService  extends UserDetailsService {
     Users createUser(Users users);
@@ -13,5 +16,5 @@ public interface UsersService  extends UserDetailsService {
     void updateUserDetails(UpdateUserRequest request);
     LoginResponse getStaffById(String staffId);
     Page<LoginResponse> getAllStaff(Integer page, Integer size);
-
+    void updateUserImage(MultipartFile image) throws IOException;
 }
