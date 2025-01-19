@@ -83,7 +83,9 @@ public class TransactionsServiceImpl implements TransactionsService {
                 totalAmount += prices.getPrice();
             }
 
-            ticketRepository.saveAll(tickets);
+            transactions.setTickets(tickets);
+
+            ticketRepository.saveAllAndFlush(tickets);
 
             transactions.setTotalAmount(totalAmount);
 
