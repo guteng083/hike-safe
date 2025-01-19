@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -79,5 +80,44 @@ public class GlobalException {
                 .error("not found")
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleConstraintViolation(
+            jakarta.validation.ConstraintViolationException exception
+    ) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        exception.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            fieldName = fieldName.substring(fieldName.lastIndexOf('.') + 1);
+            String errorMessage = violation.getMessage();
+
+            errors.computeIfAbsent(fieldName, k -> new ArrayList<>())
+                    .add(errorMessage);
+        });
+
+        ValidationErrorResponse errorResponse = ValidationErrorResponse.builder()
+                .message("Validation failed")
+                .errors(Collections.singletonList(errors))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMissingParams(
+            MissingServletRequestParameterException exception
+    ) {
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put(exception.getParameterName(),
+                Collections.singletonList(exception.getParameterName() + " parameter is required"));
+
+        ValidationErrorResponse errorResponse = ValidationErrorResponse.builder()
+                .message("Missing Required Parameters")
+                .errors(Collections.singletonList(errors))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }

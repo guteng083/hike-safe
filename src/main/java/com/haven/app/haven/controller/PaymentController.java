@@ -19,7 +19,7 @@ public class PaymentController {
     {
         paymentService.webhookNotificaction(request);
 
-        return ResponseUtils.Response("Payment notification success");
+        return ResponseUtils.response("Payment notification success");
     }
 
     @PostMapping(path="/{id}/create-payment-link")
@@ -27,6 +27,6 @@ public class PaymentController {
     {
         paymentService.createPaymentLink(id);
 
-        return ResponseUtils.Response("Payment link created");
+        return ResponseUtils.response("Payment link created");
     }
 }
