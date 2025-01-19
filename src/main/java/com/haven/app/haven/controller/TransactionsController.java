@@ -23,27 +23,27 @@ public class TransactionsController {
     public CommonResponseWithData<TransactionsResponse> createTransaction(@RequestBody TransactionsRequest transactionsRequest) {
         TransactionsResponse transactionsResponse = transactionsService.createTransaction(transactionsRequest);
 
-        return ResponseUtils.ResponseWithData("Transaction Created", transactionsResponse);
+        return ResponseUtils.responseWithData("Transaction Created", transactionsResponse);
     }
 
     @GetMapping
     public CommonResponseWithData<List<TransactionsResponse>> getAllTransactions() {
         List<TransactionsResponse> transactionsResponses = transactionsService.getTransactions();
 
-        return ResponseUtils.ResponseWithData("Get All Transactions", transactionsResponses);
+        return ResponseUtils.responseWithData("Get All Transactions", transactionsResponses);
     }
 
     @PatchMapping("/{id}/status")
     public CommonResponseWithData<TransactionsResponse> updateTransactionStatus(@PathVariable("id") String id, @RequestBody TransactionsStatusRequest request) {
         TransactionsResponse transactionsResponse = transactionsService.updateTransactionStatus(id, request);
 
-        return ResponseUtils.ResponseWithData("Transaction Updated", transactionsResponse);
+        return ResponseUtils.responseWithData("Transaction Updated", transactionsResponse);
     }
 
     @PatchMapping("/{id}/device/{deviceId}")
     public CommonResponse deviceAssignment(@PathVariable("id") String id, @PathVariable("deviceId") String deviceId) {
         transactionsService.deviceAssignment(id, deviceId);
 
-        return ResponseUtils.Response("Device has been assigned");
+        return ResponseUtils.response("Device has been assigned");
     }
 }

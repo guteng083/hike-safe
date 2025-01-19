@@ -21,13 +21,13 @@ public class CoordinateController {
     @PostMapping
     public CommonResponseWithData<CoordinateResponse> addCoordinate(@RequestBody CoordinateRequest coordinateRequest) {
         CoordinateResponse coordinateResponse = coordinateService.addCoordinate(coordinateRequest);
-        return ResponseUtils.ResponseWithData("Coordinate added", coordinateResponse);
+        return ResponseUtils.responseWithData("Coordinate added", coordinateResponse);
     }
 
     @GetMapping(path = "/{transactionId}")
     public CommonResponseWithData<List<CoordinateResponse>> getCoordinate(@PathVariable String transactionId) {
         List<CoordinateResponse> coordinateResponse = coordinateService.getCoordinate(transactionId);
-        return ResponseUtils.ResponseWithData("Coordinate list", coordinateResponse);
+        return ResponseUtils.responseWithData("Coordinate list", coordinateResponse);
     }
 
 }
