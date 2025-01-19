@@ -43,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
         try{
             String orderId = extractUUID(request.getOrder_id());
             Transactions transactions = transactionsRepository.findById(orderId)
-                    .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                    .orElseThrow(() -> new NotFoundException("Transaction not found"));
 
             Payment payment = Payment.builder()
                     .transactions(transactions)
@@ -63,6 +63,9 @@ public class PaymentServiceImpl implements PaymentService {
             log.info("Payment Service: Payment success");
         } catch (Exception e) {
             getError(e);
+            if(e instanceof NotFoundException) {
+                throw e;
+            }
             throw new PaymentException("Failed to process payment");
         }
         
@@ -111,6 +114,9 @@ public class PaymentServiceImpl implements PaymentService {
             log.info("Payment Service: Payment link created successfully");
         } catch (Exception e) {
             getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
             throw new PaymentException("Failed to create payment link");
         }
 
