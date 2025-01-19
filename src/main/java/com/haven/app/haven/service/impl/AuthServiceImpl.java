@@ -95,8 +95,9 @@ public class AuthServiceImpl implements AuthService {
         return createLoginResponse(usersService.getMe());
     }
 
-    private LoginResponse createLoginResponse(Users user) {
+    public static LoginResponse createLoginResponse(Users user) {
         return LoginResponse.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .fullName(user.getUsersDetail().getFullName())
