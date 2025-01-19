@@ -15,4 +15,5 @@ public interface TrackerDevicesService {
     TrackerDevicesResponse updateTracker(String id, TrackerDevicesRequest trackerDevicesRequest);
     TrackerDevicesResponse updateStatus(String id, TrackerDevicesStatusRequest trackerDevicesStatusRequest);
     void deleteTracker(String id);
+    TrackerDevices getBySerialNumber(String serialNumber);
 }

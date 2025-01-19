@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @Entity
-@Table(name = "coordinate")
+@Table(name = "coordinates")
 public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -7,8 +7,7 @@ import lombok.*;
 @Setter
 @Getter
 @Builder
-public class CoordinateRequest {
-    private String serialNumber;
-    private String latitude;
-    private String longitude;
+public class PricesRequest {
+    private String priceType;
+    private Double price;
 }
