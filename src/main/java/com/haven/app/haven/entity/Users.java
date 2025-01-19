@@ -37,6 +37,9 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     Role role;
 
+    @Column(name = "access_token")
+    private String accessToken;
+
     @CreationTimestamp
     private LocalDateTime createTime;
 
