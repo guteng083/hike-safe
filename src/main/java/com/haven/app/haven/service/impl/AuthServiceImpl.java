@@ -7,19 +7,22 @@ import com.haven.app.haven.dto.request.RegisterRequest;
 import com.haven.app.haven.dto.response.LoginResponse;
 import com.haven.app.haven.entity.Users;
 import com.haven.app.haven.entity.UsersDetail;
+import com.haven.app.haven.exception.AuthenticationException;
+import com.haven.app.haven.exception.ValidationException;
 import com.haven.app.haven.service.AuthService;
 import com.haven.app.haven.service.JwtService;
 import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +38,9 @@ public class AuthServiceImpl implements AuthService {
         if (secretKey.equals(secretAdminKey)) {
             usersService.createUser(createUser(request, Role.ROLE_ADMIN));
         } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("SecretKey", Collections.singletonList("SecretKey not match"));
+            throw new ValidationException("Register failed", errors);
         }
     }
 
@@ -51,27 +56,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
 
-        Users user = (Users) authentication.getPrincipal();
-
-        if (authentication.isAuthenticated()) {
+            Users user = (Users) authentication.getPrincipal();
+            user.setAccessToken(jwtService.generateToken(user));
+            usersService.updateUser(user);
             return createLoginResponse(user);
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            throw new AuthenticationException("Login Failed");
         }
-        throw new UsernameNotFoundException("Invalid email or password");
+
     }
 
     @Override
     public void changePassword(ChangePasswordRequest request) {
         Users user = usersService.getMe();
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("Password", Collections.singletonList("password incorrect"));
+            throw new ValidationException("Register failed", errors);
         }
 
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password and confirm password don't match");
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("Password", Collections.singletonList("New Password and Confirm Password do not match"));
+            throw new ValidationException("Register failed", errors);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -92,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
                 .gender(user.getUsersDetail().getGender())
                 .address(user.getUsersDetail().getAddress())
                 .phone(user.getUsersDetail().getPhone())
-                .accessToken(jwtService.generateToken(user))
+                .accessToken(user.getAccessToken())
                 .nik(user.getUsersDetail().getNik())
                 .build();
     }

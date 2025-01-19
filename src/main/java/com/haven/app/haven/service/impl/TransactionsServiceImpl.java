@@ -5,6 +5,8 @@ import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
+import com.haven.app.haven.dto.response.CommonResponse;
+import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.entity.*;
 import com.haven.app.haven.repository.*;
@@ -36,13 +38,9 @@ public class TransactionsServiceImpl implements TransactionsService {
 
         LocalDate startDate = LocalDate.parse(request.getStartDate());
         LocalDate endDate = LocalDate.parse(request.getEndDate());
-
-        System.out.println("Sampai sini ga?");
         if(endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
-
-        System.out.println("Kalo sini?");
 
         Transactions transactions = Transactions.builder()
                 .user(user)
