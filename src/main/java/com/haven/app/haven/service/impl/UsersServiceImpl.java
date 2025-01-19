@@ -55,33 +55,42 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public void updateUserDetails(UpdateUserRequest request) {
-        Users users = getMe();
-        UsersDetail userDetail = users.getUsersDetail();
-        if (userDetail == null) {
-            userDetail = new UsersDetail();
-            userDetail.setUsers(users);
-        }
-        if (request.getFullName() != null) {
-            userDetail.setFullName(request.getFullName());
-        }
-        if (request.getBirthDate() != null) {
-            userDetail.setBirthDate(request.getBirthDate());
-        }
-        if (request.getNik() != null) {
-            userDetail.setNik(request.getNik());
-        }
-        if (request.getGender() != null) {
-            userDetail.setGender(request.getGender());
-        }
-        if (request.getPhone() != null) {
-            userDetail.setPhone(request.getPhone());
-        }
-        if (request.getAddress() != null) {
-            userDetail.setAddress(request.getAddress());
-        }
+        try {
+            Users users = getMe();
+            UsersDetail userDetail = users.getUsersDetail();
+            if (userDetail == null) {
+                userDetail = new UsersDetail();
+                userDetail.setUsers(users);
+            }
+            if (request.getFullName() != null) {
+                userDetail.setFullName(request.getFullName());
+            }
+            if (request.getBirthDate() != null) {
+                userDetail.setBirthDate(request.getBirthDate());
+            }
+            if (request.getNik() != null) {
+                userDetail.setNik(request.getNik());
+            }
+            if (request.getGender() != null) {
+                userDetail.setGender(request.getGender());
+            }
+            if (request.getPhone() != null) {
+                userDetail.setPhone(request.getPhone());
+            }
+            if (request.getAddress() != null) {
+                userDetail.setAddress(request.getAddress());
+            }
 
-        users.setUsersDetail(userDetail);
-        updateUser(users);
+            users.setUsersDetail(userDetail);
+            updateUser(users);
+        } catch (Exception e) {
+            if (e instanceof ValidationException) {
+                throw new ValidationException("Update user failed", Collections.singletonMap("error", Collections.singletonList(e.getMessage())));
+            }
+
+            throw new RuntimeException("Update user failed");
+
+        }
     }
 
     @Override
@@ -95,8 +104,8 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Page<LoginResponse> getAllStaff(Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1, size);
-        Page<Users> users = usersRepository.findAllByRole(Role.ROLE_STAFF,pageable);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Users> users = usersRepository.findAllByRole(Role.ROLE_STAFF, pageable);
         return users.map(AuthServiceImpl::createLoginResponse);
     }
 
