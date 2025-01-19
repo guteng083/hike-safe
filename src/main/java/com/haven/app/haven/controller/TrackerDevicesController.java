@@ -5,10 +5,16 @@ import com.haven.app.haven.dto.request.TrackerDevicesRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.dto.response.CommonResponseWithData;
+import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.dto.response.TrackerDevicesResponse;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.utils.ResponseUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping(Constant.TRACKER_DEVICES_API)
 @RequiredArgsConstructor
+@Validated
 public class TrackerDevicesController {
     private final TrackerDevicesService trackerDevicesService;
 
@@ -26,9 +33,19 @@ public class TrackerDevicesController {
     }
 
     @GetMapping
-    public CommonResponseWithData<List<TrackerDevicesResponse>> getAllTrackerDevices() {
-        List<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices();
-        return ResponseUtils.responseWithData("Tracker Device List", trackerDevicesResponses);
+    public PageResponse<List<TrackerDevicesResponse>> getAllTrackerDevices(
+            @Valid
+            @NotNull(message = "Page number is required")
+            @Min(value = 1, message = "Page number cannot be zero negative")
+            @RequestParam(defaultValue = "1") Integer page,
+
+            @Valid
+            @NotNull(message = "Page size is required")
+            @Min(value = 1, message = "Page size cannot be zero or negative")
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices(page, size);
+        return ResponseUtils.responseWithPage("Tracker Device List", trackerDevicesResponses);
     }
 
     @GetMapping(path = "/{id}")

@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Builder
 public class TransactionsRequest {
-    private String userId;
     private String startDate;
     private String endDate;
     private List<TicketRequest> tickets;

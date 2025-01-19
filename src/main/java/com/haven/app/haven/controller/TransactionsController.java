@@ -5,10 +5,16 @@ import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.dto.response.CommonResponseWithData;
+import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.utils.ResponseUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping(Constant.TRANSACTIONS_API)
 @RequiredArgsConstructor
+@Validated
 public class TransactionsController {
     private final TransactionsService transactionsService;
 
@@ -27,10 +34,20 @@ public class TransactionsController {
     }
 
     @GetMapping
-    public CommonResponseWithData<List<TransactionsResponse>> getAllTransactions() {
-        List<TransactionsResponse> transactionsResponses = transactionsService.getTransactions();
+    public PageResponse<List<TransactionsResponse>> getAllTransactions(
+            @Valid
+            @NotNull(message = "Page number is required")
+            @Min(value = 1, message = "Page number cannot be zero negative")
+            @RequestParam(defaultValue = "1") Integer page,
 
-        return ResponseUtils.responseWithData("Get All Transactions", transactionsResponses);
+            @Valid
+            @NotNull(message = "Page size is required")
+            @Min(value = 1, message = "Page size cannot be zero or negative")
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<TransactionsResponse> transactionsResponses = transactionsService.getTransactions(page,size);
+
+        return ResponseUtils.responseWithPage("Get All Transactions", transactionsResponses);
     }
 
     @PatchMapping("/{id}/status")

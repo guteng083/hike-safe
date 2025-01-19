@@ -13,6 +13,9 @@ import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,14 +53,15 @@ public class CoordinateServiceImpl implements CoordinateService {
     }
 
     @Override
-    public List<CoordinateResponse> getCoordinate(String transactionId) {
+    public Page<CoordinateResponse> getCoordinate(String transactionId, Integer page, Integer size) {
         try {
-            Transactions transactions = transactionsService.getOne(transactionId);
+            Pageable pageable = PageRequest.of(page - 1, size);
+
+            Page<Coordinates> coordinates = coordinateRepository.findAllByTransaction_Id(pageable, transactionId);
 
             log.info("Coordinate Service: Get coordinate list successfully");
 
-            return transactions.getCoordinates().stream()
-                    .map(CoordinateResponse::CoordinateToCoordinateResponse).toList();
+            return coordinates.map(CoordinateResponse::CoordinateToCoordinateResponse);
         } catch (Exception e) {
             getError(e);
             if(e instanceof NotFoundException) {
