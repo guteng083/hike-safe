@@ -96,7 +96,7 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public Page<LoginResponse> getAllStaff(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
-        Page<Users> users = usersRepository.findAll(pageable);
+        Page<Users> users = usersRepository.findAllByRole(Role.ROLE_STAFF,pageable);
         return users.map(AuthServiceImpl::createLoginResponse);
     }
 

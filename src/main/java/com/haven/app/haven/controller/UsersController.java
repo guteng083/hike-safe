@@ -45,12 +45,12 @@ public class UsersController {
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
-            @RequestParam Integer page,
+            @RequestParam(defaultValue = "1") Integer page,
 
             @Valid
             @NotNull(message = "Page size is required")
             @Min(value = 1, message = "Page size cannot be zero or negative")
-            @RequestParam Integer size)
+            @RequestParam(defaultValue = "10") Integer size)
     {
         Page<LoginResponse> staff = usersService.getAllStaff(page, size);
         return ResponseUtils.responseWithPage("Success Get Staff", staff);
