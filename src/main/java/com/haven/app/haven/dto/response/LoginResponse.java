@@ -23,5 +23,6 @@ public class LoginResponse {
     private Gender gender;
     private String address;
     private String phone;
+    private String imageUrl;
     private String accessToken;
 }

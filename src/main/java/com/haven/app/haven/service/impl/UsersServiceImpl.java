@@ -9,6 +9,7 @@ import com.haven.app.haven.entity.UsersDetail;
 import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.ValidationException;
 import com.haven.app.haven.repository.UsersRepository;
+import com.haven.app.haven.service.CloudinaryService;
 import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,8 +20,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +34,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
-
+    private final CloudinaryService cloudinaryService;
     @Override
     public Users createUser(Users users) {
         if (emailExists(users.getEmail())) {
@@ -107,6 +110,14 @@ public class UsersServiceImpl implements UsersService {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Users> users = usersRepository.findAllByRole(Role.ROLE_STAFF, pageable);
         return users.map(AuthServiceImpl::createLoginResponse);
+    }
+
+    @Override
+    public void updateUserImage(MultipartFile image) throws IOException {
+        Users users = getMe();
+        String imageUrl = cloudinaryService.uploadImage(image, users.getId());
+        users.getUsersDetail().setImageUrl(imageUrl);
+        updateUser(users);
     }
 
     public boolean emailExists(String email) {
