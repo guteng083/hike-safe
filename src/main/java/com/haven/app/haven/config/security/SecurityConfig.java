@@ -34,8 +34,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(corsConfigurer -> {})
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/coordinate/**").permitAll()
@@ -50,15 +50,23 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
 
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("118.99.126.169"));
-        corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH" ,"DELETE", "OPTIONS"));
+        config.addAllowedOrigin("*");
 
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        // Allow all headers
+        config.addAllowedHeader("*");
 
+        // Allow all methods (GET, POST, PUT, DELETE, etc.)
+        config.addAllowedMethod("*");
+
+        // Allow credentials (cookies, authorization headers, etc.)
+        config.setAllowCredentials(true);
+
+        // How long the response to the preflight request can be cached
+        config.setMaxAge(3600L);
+
+        source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 
