@@ -35,7 +35,7 @@ public class CoordinateServiceImpl implements CoordinateService {
             Transactions transactions = transactionsService.getTransactionByTracker(trackerDevices);
 
             Coordinates coordinates = Coordinates.builder()
-                    .tracker(trackerDevices)
+                .tracker(trackerDevices)
                     .transaction(transactions)
                     .longitude(coordinateRequest.getLongitude())
                     .latitude(coordinateRequest.getLatitude())
