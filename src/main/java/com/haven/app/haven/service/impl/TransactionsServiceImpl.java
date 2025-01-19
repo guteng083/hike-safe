@@ -241,15 +241,18 @@ public class TransactionsServiceImpl implements TransactionsService {
     @Override
     public Transactions getTransactionByTracker(TrackerDevices trackerDevices) {
         try {
-            Transactions transactions = transactionsRepository.findByTracker(trackerDevices);
+            List<Transactions> transactionsList = transactionsRepository.findByTracker(trackerDevices);
 
-            if(transactions == null) {
+            if(transactionsList == null) {
                 throw new NotFoundException("Transactions not found");
             }
 
             log.info("Transactions Service: Get transactions by tracker successfully");
 
-            return transactions;
+            return transactionsList.stream()
+                    .filter(transactions -> transactions.getStatus() == TransactionStatus.START)
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Transactions not found"));
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {
