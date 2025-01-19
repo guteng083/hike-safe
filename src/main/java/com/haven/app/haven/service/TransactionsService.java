@@ -5,12 +5,13 @@ import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.entity.TrackerDevices;
 import com.haven.app.haven.entity.Transactions;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TransactionsService {
     TransactionsResponse createTransaction(TransactionsRequest request);
-    List<TransactionsResponse> getTransactions();
+    Page<TransactionsResponse> getTransactions(Integer page, Integer size);
     TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request);
     Transactions getOne(String id);
     void deviceAssignment(String id, String deviceId);

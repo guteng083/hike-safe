@@ -11,6 +11,9 @@ import com.haven.app.haven.repository.TrackerDevicesRepository;
 import com.haven.app.haven.service.TrackerDevicesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,9 +44,10 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
     }
 
     @Override
-    public List<TrackerDevicesResponse> getTrackerDevices() {
+    public Page<TrackerDevicesResponse> getTrackerDevices(Integer page, Integer size) {
         try {
-            List<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll();
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll(pageable);
 
             if (trackerDevices.isEmpty()){
                 throw new NotFoundException("Tracker device list not found");
@@ -51,7 +55,7 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
 
             log.info("Tracker Device Service: Get tracker devices list");
 
-            return trackerDevices.stream().map(TrackerDevicesResponse::trackerDevicesToTrackerDevicesResponse).toList();
+            return trackerDevices.map(TrackerDevicesResponse::trackerDevicesToTrackerDevicesResponse);
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException){

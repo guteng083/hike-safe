@@ -15,8 +15,12 @@ import com.haven.app.haven.exception.TransactionsException;
 import com.haven.app.haven.repository.*;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
+import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,7 +36,7 @@ import java.util.Objects;
 public class TransactionsServiceImpl implements TransactionsService {
     private final TransactionsRepository transactionsRepository;
     private final TicketRepository ticketRepository;
-    private final UsersRepository usersRepository;
+    private final UsersService usersService;
     private final PricesRepository pricesRepository;
     private final TrackerDevicesService trackerDevicesService;
     private final TrackerDevicesRepository trackerDevicesRepository;
@@ -40,8 +44,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     @Override
     public TransactionsResponse createTransaction(TransactionsRequest request) {
         try {
-            Users user = usersRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+            Users user = usersService.getMe();
 
             LocalDate startDate = LocalDate.parse(request.getStartDate());
             LocalDate endDate = LocalDate.parse(request.getEndDate());
@@ -104,9 +107,10 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public List<TransactionsResponse> getTransactions() {
+    public Page<TransactionsResponse> getTransactions(Integer page, Integer size) {
         try {
-            List<Transactions> transactions = transactionsRepository.findAll();
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<Transactions> transactions = transactionsRepository.findAll(pageable);
 
             if(transactions.isEmpty()) {
                 throw new NotFoundException("Transactions not found");
@@ -114,7 +118,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             log.info("Transactions Service: Get transactions list successfully");
 
-            return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+            return transactions.map(TransactionsResponse::toTransactionResponse);
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {

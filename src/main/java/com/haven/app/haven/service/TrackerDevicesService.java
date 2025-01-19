@@ -4,12 +4,13 @@ import com.haven.app.haven.dto.request.TrackerDevicesRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesStatusRequest;
 import com.haven.app.haven.dto.response.TrackerDevicesResponse;
 import com.haven.app.haven.entity.TrackerDevices;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TrackerDevicesService {
     TrackerDevicesResponse createTracker(TrackerDevicesRequest trackerDevicesRequest);
-    List<TrackerDevicesResponse> getTrackerDevices();
+    Page<TrackerDevicesResponse> getTrackerDevices(Integer page, Integer size);
     TrackerDevicesResponse getTrackerById(String id);
     TrackerDevices getOne(String id);
     TrackerDevicesResponse updateTracker(String id, TrackerDevicesRequest trackerDevicesRequest);
