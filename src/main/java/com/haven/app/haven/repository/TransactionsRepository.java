@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface TransactionsRepository extends JpaRepository<Transactions, String> {
-    Transactions findByTracker(TrackerDevices trackerDevices);
+    List<Transactions> findByTracker(TrackerDevices trackerDevices);
     List<Transactions> findByUserId(String userId);
 }
