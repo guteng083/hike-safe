@@ -56,7 +56,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedOriginPattern("*");
         corsConfiguration.setAllowedOrigins(List.of("*"));
         corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH" ,"DELETE", "OPTIONS"));
 
         source.registerCorsConfiguration("/**", corsConfiguration);
 
