@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/coordinates/**").permitAll()
                         .requestMatchers("/api/v1/payments/notification").permitAll()
                         .requestMatchers("/api/v1/auth/password/update").authenticated()
                         .anyRequest().authenticated())
