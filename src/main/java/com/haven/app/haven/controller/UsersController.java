@@ -33,14 +33,14 @@ public class UsersController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
+    @GetMapping("/staff/{id}")
     public CommonResponseWithData<LoginResponse> getStaff(@Valid @PathVariable String id) {
         LoginResponse staff = usersService.getStaffById(id);
         return ResponseUtils.responseWithData("Success Get Staff", staff);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
+    @GetMapping("/staff")
     public PageResponse<List<LoginResponse>> getAllStaff(
             @Valid
             @NotNull(message = "Page number is required")
@@ -53,6 +53,30 @@ public class UsersController {
             @RequestParam(defaultValue = "10") Integer size) {
         Page<LoginResponse> staff = usersService.getAllStaff(page, size);
         return ResponseUtils.responseWithPage("Success Get Staff", staff);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/customer")
+    public PageResponse<List<LoginResponse>> getAllCustomer(
+            @Valid
+            @NotNull(message = "Page number is required")
+            @Min(value = 1, message = "Page number cannot be zero negative")
+            @RequestParam(defaultValue = "1") Integer page,
+
+            @Valid
+            @NotNull(message = "Page size is required")
+            @Min(value = 1, message = "Page size cannot be zero or negative")
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<LoginResponse> staff = usersService.getAllCustomer(page, size);
+        return ResponseUtils.responseWithPage("Success Get Customer", staff);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/customer/{customerId}")
+    public CommonResponseWithData<LoginResponse> getCustomer(@Valid @PathVariable String customerId) {
+        LoginResponse customer = usersService.getCustomerById(customerId);
+        return ResponseUtils.responseWithData("Success Get Customer", customer);
     }
 
     @PutMapping("/update/image")
