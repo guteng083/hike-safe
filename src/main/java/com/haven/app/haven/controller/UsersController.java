@@ -1,6 +1,7 @@
 package com.haven.app.haven.controller;
 
 import com.haven.app.haven.constant.Endpoint;
+import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.UpdateUserRequest;
 import com.haven.app.haven.dto.response.*;
 import com.haven.app.haven.service.UsersService;
@@ -33,47 +34,66 @@ public class UsersController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/staff/{id}")
+    @GetMapping("/staffs/{id}")
     public CommonResponseWithData<LoginResponse> getStaff(@Valid @PathVariable String id) {
         LoginResponse staff = usersService.getStaffById(id);
         return ResponseUtils.responseWithData("Success Get Staff", staff);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/staff")
+    @GetMapping("/staffs")
     public PageResponse<List<LoginResponse>> getAllStaff(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email,
+
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
-            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "1", name = "page") Integer page,
 
             @Valid
             @NotNull(message = "Page size is required")
             @Min(value = 1, message = "Page size cannot be zero or negative")
-            @RequestParam(defaultValue = "10") Integer size) {
-        Page<LoginResponse> staff = usersService.getAllStaff(page, size);
+            @RequestParam(defaultValue = "10", name = "size") Integer size) {
+        SearchRequest searchRequest = SearchRequest.builder()
+                .name(name)
+                .email(email)
+                .page(page)
+                .size(size)
+                .build();
+        Page<LoginResponse> staff = usersService.getAllStaff(searchRequest);
         return ResponseUtils.responseWithPage("Success Get Staff", staff);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    @GetMapping("/customer")
+    @GetMapping("/customers")
     public PageResponse<List<LoginResponse>> getAllCustomer(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email,
+
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
-            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "1", name = "page") Integer page,
 
             @Valid
             @NotNull(message = "Page size is required")
             @Min(value = 1, message = "Page size cannot be zero or negative")
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10", name = "size") Integer size
     ) {
-        Page<LoginResponse> staff = usersService.getAllCustomer(page, size);
+        SearchRequest searchRequest = SearchRequest.builder()
+                .name(name)
+                .email(email)
+                .page(page)
+                .size(size)
+                .build();
+
+        Page<LoginResponse> staff = usersService.getAllCustomer(searchRequest);
         return ResponseUtils.responseWithPage("Success Get Customer", staff);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/customers/{customerId}")
     public CommonResponseWithData<LoginResponse> getCustomer(@Valid @PathVariable String customerId) {
         LoginResponse customer = usersService.getCustomerById(customerId);
         return ResponseUtils.responseWithData("Success Get Customer", customer);
@@ -88,14 +108,14 @@ public class UsersController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/staff/{staffId}")
+    @PatchMapping("/staffs/{staffId}/reset-password")
     public CommonResponse resetPassword(@PathVariable String staffId) {
         usersService.resetPassword(staffId);
         return ResponseUtils.response("Success reset password");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/staff/{staffId}")
+    @DeleteMapping("/staffs/{staffId}")
     public CommonResponse deleteStaff(@PathVariable String staffId) {
         usersService.deleteStaff(staffId);
         return ResponseUtils.response("Success delete staff");

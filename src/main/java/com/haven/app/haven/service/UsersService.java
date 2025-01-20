@@ -1,5 +1,6 @@
 package com.haven.app.haven.service;
 
+import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.UpdateUserRequest;
 import com.haven.app.haven.dto.response.LoginResponse;
 import com.haven.app.haven.entity.Users;
@@ -15,8 +16,8 @@ public interface UsersService  extends UserDetailsService {
     void updateUser(Users users);
     void updateUserDetails(UpdateUserRequest request);
     LoginResponse getStaffById(String staffId);
-    Page<LoginResponse> getAllStaff(Integer page, Integer size);
-    Page<LoginResponse> getAllCustomer(Integer page, Integer size);
+    Page<LoginResponse> getAllStaff(SearchRequest searchRequest);
+    Page<LoginResponse> getAllCustomer(SearchRequest searchRequest);
     LoginResponse getCustomerById(String customerId);
     void updateUserImage(MultipartFile image) throws IOException;
     void deleteStaff(String staffId);
