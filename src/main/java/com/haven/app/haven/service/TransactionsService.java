@@ -1,5 +1,6 @@
 package com.haven.app.haven.service;
 
+import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.TransactionsResponse;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public interface TransactionsService {
     TransactionsResponse createTransaction(TransactionsRequest request);
-    Page<TransactionsResponse> getTransactions(Integer page, Integer size);
+    Page<TransactionsResponse> getTransactions(SearchRequest request);
     TransactionsResponseWithCoordinate getTransactionById(String id);
     Page<TransactionsResponse> getTransactionByUser(Integer page, Integer size);
     List<TransactionsResponse> getTransactionByUserWithoutPage();

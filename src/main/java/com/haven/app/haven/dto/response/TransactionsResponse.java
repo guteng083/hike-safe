@@ -1,6 +1,7 @@
 package com.haven.app.haven.dto.response;
 
 import com.haven.app.haven.entity.Transactions;
+import com.haven.app.haven.service.impl.AuthServiceImpl;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -13,9 +14,11 @@ import java.util.List;
 @Builder
 public class TransactionsResponse {
     private String id;
+    private LoginResponse user;
     private String startDate;
     private String endDate;
     private String status;
+    private String paymentUrl;
     private Double totalAmount;
     private List<TicketResponse> tickets;
     private String trackerId;
@@ -30,16 +33,20 @@ public class TransactionsResponse {
                         .hikerName(ticket.getHikerName())
                         .address(ticket.getAddress())
                         .phoneNumber(ticket.getPhoneNumber())
+                        .ticketPrice(ticket.getPrices().getPrice())
+                        .ticketType(ticket.getPrices().getPriceType())
                         .build())
                 .toList()
                 : new ArrayList<>();
 
         return TransactionsResponse.builder()
                 .id(transactions.getId())
+                .user(AuthServiceImpl.createLoginResponse(transactions.getUser()))
                 .startDate(transactions.getStartDate().toString())
                 .endDate(transactions.getEndDate().toString())
                 .status(transactions.getStatus().toString())
                 .totalAmount(transactions.getTotalAmount())
+                .paymentUrl(transactions.getPaymentUrl())
                 .tickets(ticketResponses)
                 .trackerId(transactions.getTracker() != null ? transactions.getTracker().getId() : null)
                 .createdAt(transactions.getCreatedAt().toString())

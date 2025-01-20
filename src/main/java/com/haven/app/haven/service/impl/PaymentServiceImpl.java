@@ -118,6 +118,8 @@ public class PaymentServiceImpl implements PaymentService {
 
             transactions.setPaymentUrl(paymentUrl);
 
+            transactions.setStatus(TransactionStatus.UNPAID);
+
             transactionsRepository.saveAndFlush(transactions);
 
             log.info("Payment Service: Payment link created successfully");

@@ -33,6 +33,8 @@ public class TransactionsResponseWithCoordinate {
                         .hikerName(ticket.getHikerName())
                         .address(ticket.getAddress())
                         .phoneNumber(ticket.getPhoneNumber())
+                        .ticketPrice(ticket.getPrices().getPrice())
+                        .ticketType(ticket.getPrices().getPriceType())
                         .build())
                 .toList()
                 : new ArrayList<>();
