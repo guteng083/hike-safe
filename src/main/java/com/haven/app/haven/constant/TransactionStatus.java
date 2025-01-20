@@ -5,7 +5,8 @@ public enum TransactionStatus {
     BOOKED("BOOKED"),
     CANCELLED("CANCELLED"),
     START("START"),
-    DONE("DONE");
+    DONE("DONE"),
+    UNPAID("UNPAID");
 
     private String value;
 

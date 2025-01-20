@@ -3,6 +3,7 @@ package com.haven.app.haven.service.impl;
 import com.haven.app.haven.constant.PriceType;
 import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
+import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
@@ -17,11 +18,13 @@ import com.haven.app.haven.repository.*;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.service.UsersService;
+import com.haven.app.haven.specification.TransactionSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -109,10 +112,14 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public Page<TransactionsResponse> getTransactions(Integer page, Integer size) {
+    public Page<TransactionsResponse> getTransactions(SearchRequest searchRequest) {
         try {
-            Pageable pageable = PageRequest.of(page - 1, size);
-            Page<Transactions> transactions = transactionsRepository.findAll(pageable);
+            Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
+
+            Specification<Transactions> specification =
+                    TransactionSpecification.getSpecification(searchRequest);
+
+            Page<Transactions> transactions = transactionsRepository.findAll(specification,pageable);
 
             if(transactions.isEmpty()) {
                 throw new NotFoundException("Transactions not found");
