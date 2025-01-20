@@ -16,24 +16,28 @@ import java.util.List;
 public class UsersSpecification {
     public static Specification<Users> getSpecification(SearchRequest searchRequest, Role role) {
         return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+            try {
+                List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(cb.equal(root.get("role"), role));
+                predicates.add(cb.equal(root.get("role"), role));
 
-            if (searchRequest != null) {
-                if (StringUtils.hasText(searchRequest.getName())) {
+                if (searchRequest != null && StringUtils.hasText(searchRequest.getSearch())) {
                     Join<Users, UsersDetail> join = root.join("usersDetail", JoinType.LEFT);
-                    String name = searchRequest.getName().trim().toLowerCase();
-                    predicates.add(cb.like(cb.lower(join.get("fullName")), "%" + name + "%"));
+                    String search = searchRequest.getSearch().trim().toLowerCase();
+
+                    List<Predicate> searchPredicates = new ArrayList<>();
+
+                    searchPredicates.add(cb.like(cb.lower(join.get("fullName")), "%" + search + "%"));
+
+                    searchPredicates.add(cb.like(cb.lower(root.get("email")), "%" + search + "%"));
+
+                    predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
                 }
 
-                if (StringUtils.hasText(searchRequest.getEmail())) {
-                    String email = searchRequest.getEmail().trim();
-                    predicates.add(cb.equal(cb.lower(root.get("email")), email.toLowerCase()));
-                }
+                return cb.and(predicates.toArray(new Predicate[0]));
+            } catch (Exception e) {
+                throw e;
             }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

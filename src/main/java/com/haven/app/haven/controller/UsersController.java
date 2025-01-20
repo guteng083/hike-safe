@@ -43,8 +43,7 @@ public class UsersController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/staffs")
     public PageResponse<List<LoginResponse>> getAllStaff(
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "search", required = false) String search,
 
             @Valid
             @NotNull(message = "Page number is required")
@@ -56,8 +55,7 @@ public class UsersController {
             @Min(value = 1, message = "Page size cannot be zero or negative")
             @RequestParam(defaultValue = "10", name = "size") Integer size) {
         SearchRequest searchRequest = SearchRequest.builder()
-                .name(name)
-                .email(email)
+                .search(search)
                 .page(page)
                 .size(size)
                 .build();
@@ -68,9 +66,7 @@ public class UsersController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping("/customers")
     public PageResponse<List<LoginResponse>> getAllCustomer(
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "email", required = false) String email,
-
+            @RequestParam(name = "search", required = false) String search,
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
@@ -82,8 +78,7 @@ public class UsersController {
             @RequestParam(defaultValue = "10", name = "size") Integer size
     ) {
         SearchRequest searchRequest = SearchRequest.builder()
-                .name(name)
-                .email(email)
+                .search(search)
                 .page(page)
                 .size(size)
                 .build();
