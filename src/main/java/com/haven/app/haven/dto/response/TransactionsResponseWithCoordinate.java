@@ -1,17 +1,17 @@
 package com.haven.app.haven.dto.response;
 
 import com.haven.app.haven.entity.Transactions;
+import com.haven.app.haven.service.impl.AuthServiceImpl;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
 @Builder
-public class TransactionsResponse {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransactionsResponseWithCoordinate {
     private String id;
     private String startDate;
     private String endDate;
@@ -19,10 +19,12 @@ public class TransactionsResponse {
     private Double totalAmount;
     private List<TicketResponse> tickets;
     private String trackerId;
+    private List<CoordinateResponse> coordinates;
     private String createdAt;
+    private LoginResponse users;
     private String updatedAt;
 
-    public static TransactionsResponse toTransactionResponse(Transactions transactions) {
+    public static TransactionsResponseWithCoordinate toTransactionResponseWithCoordinates(Transactions transactions) {
         List<TicketResponse> ticketResponses = transactions.getTickets() != null
                 ? transactions.getTickets().stream()
                 .map(ticket -> TicketResponse.builder()
@@ -34,13 +36,15 @@ public class TransactionsResponse {
                 .toList()
                 : new ArrayList<>();
 
-        return TransactionsResponse.builder()
+        return TransactionsResponseWithCoordinate.builder()
                 .id(transactions.getId())
+                .users(AuthServiceImpl.createLoginResponse(transactions.getUser()))
                 .startDate(transactions.getStartDate().toString())
                 .endDate(transactions.getEndDate().toString())
                 .status(transactions.getStatus().toString())
                 .totalAmount(transactions.getTotalAmount())
                 .tickets(ticketResponses)
+                .coordinates(transactions.getCoordinates().stream().map(coordinates1 -> CoordinateResponse.CoordinateToCoordinateResponse(coordinates1)).toList())
                 .trackerId(transactions.getTracker() != null ? transactions.getTracker().getId() : null)
                 .createdAt(transactions.getCreatedAt().toString())
                 .updatedAt(transactions.getUpdatedAt().toString())
