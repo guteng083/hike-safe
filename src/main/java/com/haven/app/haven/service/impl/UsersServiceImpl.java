@@ -1,6 +1,7 @@
 package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.constant.Role;
+import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.UpdateUserRequest;
 import com.haven.app.haven.dto.response.LoginResponse;
 import com.haven.app.haven.dto.response.RegisterResponse;
@@ -11,11 +12,13 @@ import com.haven.app.haven.exception.ValidationException;
 import com.haven.app.haven.repository.UsersRepository;
 import com.haven.app.haven.service.CloudinaryService;
 import com.haven.app.haven.service.UsersService;
+import com.haven.app.haven.specification.UsersSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -111,25 +114,29 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public Page<LoginResponse> getAllStaff(Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Users> users = usersRepository.findAllByRole(Role.ROLE_STAFF, pageable);
+    public Page<LoginResponse> getAllStaff(SearchRequest searchRequest) {
+        Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
+
+        Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_STAFF);
+
+        Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
+
+        log.info("Users Service: Get all staff");
+
         return users.map(AuthServiceImpl::createLoginResponse);
     }
 
     @Override
-    public Page<LoginResponse> getAllCustomer(Integer page, Integer size) {
-        try {
-            Pageable pageable = PageRequest.of(page - 1, size);
-            Page<Users> users = usersRepository.findAllByRole(Role.ROLE_CUSTOMER, pageable);
+    public Page<LoginResponse> getAllCustomer(SearchRequest searchRequest) {
+        Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
 
-            log.info("Users Service: Get all customer successfully");
+        Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_CUSTOMER);
 
-            return users.map(AuthServiceImpl::createLoginResponse);
-        } catch (Exception e) {
-            getError(e);
-            throw new NotFoundException("Get customer failed");
-        }
+        Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
+
+        log.info("Users Service: Get all customer");
+
+        return users.map(AuthServiceImpl::createLoginResponse);
     }
 
     @Override
