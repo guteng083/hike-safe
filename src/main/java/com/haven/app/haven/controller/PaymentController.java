@@ -3,6 +3,7 @@ package com.haven.app.haven.controller;
 import com.haven.app.haven.constant.Endpoint;
 import com.haven.app.haven.dto.request.MidtransWebhookRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
+import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.service.PaymentService;
 import com.haven.app.haven.utils.ResponseUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,10 +26,10 @@ public class PaymentController {
     }
 
     @PostMapping(path="/{id}/create-payment-link")
-    public CommonResponse createPaymentLink(@PathVariable String id)
+    public CommonResponseWithData<String> createPaymentLink(@PathVariable String id)
     {
-        paymentService.createPaymentLink(id);
+        String paymentUrl = paymentService.createPaymentLink(id);
 
-        return ResponseUtils.response("Payment link created");
+        return ResponseUtils.responseWithData("Payment link created", paymentUrl);
     }
 }

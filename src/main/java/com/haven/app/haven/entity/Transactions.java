@@ -47,6 +47,9 @@ public class Transactions {
     @OneToMany(mappedBy = "transaction")
     private List<Coordinates> coordinates;
 
+    @Column(name = "payment_url")
+    private String paymentUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
