@@ -89,5 +89,17 @@ public class UsersController {
         return ResponseUtils.response("Success update user image");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/staff/{staffId}")
+    public CommonResponse resetPassword(@PathVariable String staffId) {
+        usersService.resetPassword(staffId);
+        return ResponseUtils.response("Success reset password");
+    }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/staff/{staffId}")
+    public CommonResponse deleteStaff(@PathVariable String staffId) {
+        usersService.deleteStaff(staffId);
+        return ResponseUtils.response("Success delete staff");
+    }
 }

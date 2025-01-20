@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +38,8 @@ import java.util.Map;
 public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final CloudinaryService cloudinaryService;
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     public Users createUser(Users users) {
         if (emailExists(users.getEmail())) {
@@ -153,6 +156,39 @@ public class UsersServiceImpl implements UsersService {
         String imageUrl = cloudinaryService.uploadImage(image, users.getId());
         users.getUsersDetail().setImageUrl(imageUrl);
         updateUser(users);
+    }
+
+    @Override
+    public void deleteStaff(String staffId) {
+        try {
+            Users staff = usersRepository.findById(staffId)
+                    .orElseThrow(() -> new NotFoundException("Staff not found"));
+
+            usersRepository.delete(staff);
+
+            log.info("Users Service: Delete staff successfully");
+        } catch (Exception e) {
+            getError(e);
+            throw new NotFoundException("Delete staff failed");
+        }
+    }
+
+    @Override
+    public void resetPassword(String staffId) {
+        try {
+            Users staff = usersRepository.findById(staffId)
+                    .orElseThrow(() -> new NotFoundException("Staff not found"));
+
+            String defaultPassword = "password";
+
+            staff.setPassword(passwordEncoder.encode(defaultPassword));
+            updateUser(staff);
+
+            log.info("Users Service: Reset password successfully");
+        } catch (Exception e) {
+            getError(e);
+            throw new NotFoundException("Reset password failed");
+        }
     }
 
     public boolean emailExists(String email) {
