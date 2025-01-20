@@ -8,6 +8,7 @@ import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
+import com.haven.app.haven.dto.response.TransactionsResponseWithCoordinate;
 import com.haven.app.haven.entity.*;
 import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.TrackerDeviceException;
@@ -29,6 +30,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -129,13 +131,13 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public TransactionsResponse getTransactionById(String id) {
+    public TransactionsResponseWithCoordinate getTransactionById(String id) {
         try {
             Transactions transactions = getOne(id);
 
             log.info("Transactions Service: Get transaction by id successfully");
 
-            return TransactionsResponse.toTransactionResponse(transactions);
+            return TransactionsResponseWithCoordinate.toTransactionResponseWithCoordinates(transactions);
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {
@@ -146,15 +148,31 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public List<TransactionsResponse> getTransactionByUser() {
+    public Page<TransactionsResponse> getTransactionByUser(Integer page, Integer size) {
         try {
             Users user = usersService.getMe();
-
-            List<Transactions> transactions = transactionsRepository.findByUserId(user.getId());
-
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<Transactions> transactions = transactionsRepository.findAllByUser(user, pageable);
             log.info("Transactions Service: Get transactions by user successfully");
 
-            return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+            return transactions.map(TransactionsResponse::toTransactionResponse);
+        } catch (Exception e) {
+            getError(e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to get transactions by user");
+        }
+    }
+
+    @Override
+    public List<TransactionsResponse> getTransactionByUserWithoutPage() {
+        try {
+            Users user = usersService.getMe();
+            List<Transactions> transactions = transactionsRepository.findAllByUser(user);
+            log.info("Transactions Service: Get transactions by user successfully");
+
+            return transactions.stream().map(TransactionsResponse::toTransactionResponse).collect(Collectors.toList());
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {
@@ -224,6 +242,8 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             trackerDevices.setStatus(TrackerStatus.USED);
 
+            transactions.setStatus(TransactionStatus.START);
+
             trackerDevicesRepository.saveAndFlush(trackerDevices);
 
             transactionsRepository.saveAndFlush(transactions);
@@ -241,7 +261,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     @Override
     public Transactions getTransactionByTracker(TrackerDevices trackerDevices) {
         try {
-            List<Transactions> transactionsList = transactionsRepository.findByTracker(trackerDevices);
+            List<Transactions> transactionsList = transactionsRepository.findAllByTracker(trackerDevices);
 
             if(transactionsList == null) {
                 throw new NotFoundException("Transactions not found");

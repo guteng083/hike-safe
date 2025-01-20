@@ -6,6 +6,7 @@ import com.haven.app.haven.dto.request.UpdateUserRequest;
 import com.haven.app.haven.dto.response.*;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import java.util.List;
 @Validated
 @RequestMapping(path = Endpoint.API_USER)
 @RequiredArgsConstructor
+@Tag(name="User Management", description = "APIs for user management")
 public class UsersController {
     private final UsersService usersService;
 

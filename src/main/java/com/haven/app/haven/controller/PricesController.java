@@ -6,7 +6,9 @@ import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.PricesResponse;
 import com.haven.app.haven.service.PricesService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping(Constant.PRICE_API)
 @RequiredArgsConstructor
+@Tag(name="Ticket Price Management", description = "APIs for ticket price management")
 public class PricesController {
     private final PricesService pricesService;
 

@@ -3,17 +3,16 @@ package com.haven.app.haven.controller;
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
-import com.haven.app.haven.dto.response.CommonResponse;
-import com.haven.app.haven.dto.response.CommonResponseWithData;
-import com.haven.app.haven.dto.response.PageResponse;
-import com.haven.app.haven.dto.response.TransactionsResponse;
+import com.haven.app.haven.dto.response.*;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +22,7 @@ import java.util.List;
 @RequestMapping(Constant.TRANSACTIONS_API)
 @RequiredArgsConstructor
 @Validated
+@Tag(name="Transaction", description = "APIs for transaction")
 public class TransactionsController {
     private final TransactionsService transactionsService;
 
@@ -51,17 +51,30 @@ public class TransactionsController {
     }
 
     @GetMapping("/{id}")
-    public CommonResponseWithData<TransactionsResponse> getTransactionById(@PathVariable String id) {
-        TransactionsResponse transactionsResponse = transactionsService.getTransactionById(id);
-
+    public CommonResponseWithData<TransactionsResponseWithCoordinate> getTransactionById(@PathVariable String id) {
+        TransactionsResponseWithCoordinate transactionsResponse = transactionsService.getTransactionById(id);
         return ResponseUtils.responseWithData("Get Transaction By Id", transactionsResponse);
     }
 
     @GetMapping("/user")
-    public CommonResponseWithData<List<TransactionsResponse>> getTransactionsByUserId() {
-        List<TransactionsResponse> transactionsResponses = transactionsService.getTransactionByUser();
+    public ResponseEntity<?> getTransactionsByUserId(
+            @RequestParam(defaultValue = "true") boolean pagination,
 
-        return ResponseUtils.responseWithData("Get Transaction By User", transactionsResponses);
+            @Valid
+            @Min(value = 1, message = "Page number cannot be zero negative")
+            @RequestParam(defaultValue = "1") Integer page,
+
+            @Valid
+            @Min(value = 1, message = "Size number cannot be zero negative")
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        if (pagination) {
+            Page<TransactionsResponse> transactionsResponses = transactionsService.getTransactionByUser(page,size);
+            return ResponseEntity.ok(ResponseUtils.responseWithPage("Get Transaction By User", transactionsResponses));
+        } else {
+            List<TransactionsResponse> transactionsResponses = transactionsService.getTransactionByUserWithoutPage();
+            return ResponseEntity.ok(ResponseUtils.responseWithData("Get Transaction By User", transactionsResponses));
+        }
     }
 
     @PatchMapping("/{id}/status")

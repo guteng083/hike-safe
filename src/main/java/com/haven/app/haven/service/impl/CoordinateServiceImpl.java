@@ -32,6 +32,7 @@ public class CoordinateServiceImpl implements CoordinateService {
     public CoordinateResponse addCoordinate(CoordinateRequest coordinateRequest) {
         try {
             TrackerDevices trackerDevices = trackerDevicesService.getBySerialNumber(coordinateRequest.getSerialNumber());
+            System.out.println(trackerDevices.getSerialNumber());
             Transactions transactions = transactionsService.getTransactionByTracker(trackerDevices);
 
             Coordinates coordinates = Coordinates.builder()
