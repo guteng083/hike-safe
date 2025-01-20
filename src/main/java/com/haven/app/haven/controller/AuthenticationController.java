@@ -10,6 +10,7 @@ import com.haven.app.haven.dto.response.LoginResponse;
 import com.haven.app.haven.service.AuthService;
 import com.haven.app.haven.utils.ResponseUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +33,9 @@ public class AuthenticationController {
     public CommonResponse RegisterAdmin(
             @Valid
             @RequestBody RegisterRequest registerRequest,
+
+            @Valid
+            @NotNull(message = "Admin Secret Key is Required")
             @RequestHeader(name = "X-ADMIN-SECRET-KEY") String secretKey) {
         authService.registerAdmin(registerRequest, secretKey);
         return ResponseUtils.response("Register Success");
