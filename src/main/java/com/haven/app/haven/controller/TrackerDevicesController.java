@@ -9,6 +9,7 @@ import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.dto.response.TrackerDevicesResponse;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping(Constant.TRACKER_DEVICES_API)
 @RequiredArgsConstructor
 @Validated
+@Tag(name="Tracker Device Management", description = "APIs for tracker device management")
 public class TrackerDevicesController {
     private final TrackerDevicesService trackerDevicesService;
 

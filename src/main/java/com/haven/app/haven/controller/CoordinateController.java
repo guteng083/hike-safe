@@ -7,6 +7,8 @@ import com.haven.app.haven.dto.response.CoordinateResponse;
 import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.service.CoordinateService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -22,15 +24,18 @@ import java.util.List;
 @RequestMapping(Constant.COORDINATE_API)
 @RequiredArgsConstructor
 @Validated
+@Tag(name="Coordinates Management", description = "APIs for authentication coordinates management")
 public class CoordinateController {
     private final CoordinateService coordinateService;
 
+    @SecurityRequirements
     @PostMapping
     public CommonResponseWithData<CoordinateResponse> addCoordinate(@RequestBody CoordinateRequest coordinateRequest) {
         CoordinateResponse coordinateResponse = coordinateService.addCoordinate(coordinateRequest);
         return ResponseUtils.responseWithData("Coordinate added", coordinateResponse);
     }
 
+    @SecurityRequirements
     @GetMapping(path = "/{transactionId}")
     public PageResponse<List<CoordinateResponse>> getCoordinate(
             @PathVariable String transactionId,

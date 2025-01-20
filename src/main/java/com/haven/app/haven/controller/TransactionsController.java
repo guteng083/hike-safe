@@ -9,6 +9,7 @@ import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.dto.response.TransactionsResponse;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping(Constant.TRANSACTIONS_API)
 @RequiredArgsConstructor
 @Validated
+@Tag(name="Transaction", description = "APIs for transaction")
 public class TransactionsController {
     private final TransactionsService transactionsService;
 

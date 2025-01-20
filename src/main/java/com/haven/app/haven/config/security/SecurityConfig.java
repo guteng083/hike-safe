@@ -41,6 +41,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/coordinate/**","/api/v1/coordinate").permitAll()
                         .requestMatchers("/api/v1/payments/notification").permitAll()
                         .requestMatchers("/api/v1/auth/password/update").authenticated()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/swagger-config"
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class )

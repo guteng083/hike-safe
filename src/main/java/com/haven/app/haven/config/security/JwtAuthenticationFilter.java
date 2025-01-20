@@ -34,7 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/auth/register-customer",
             "/api/v1/auth/register-admin",
             "/api/v1/coordinate",
-            "/api/v1/payments/notification"
+            "/api/v1/payments/notification",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/webjars/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/v3/api-docs/swagger-config",
     };
 
     @Override
@@ -66,20 +72,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwtToken = null;
             String email = null;
 
+//            System.out.println(request.getRequestURI());
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                handleAuthenticationException(response, "Authorization header is missing or invalid");
-                return;
+                throw new AuthenticationException("Authorization header not found or invalid endpoint url");
             }
 
             jwtToken = authHeader.substring(7);
             try {
                 email = jwtService.extractEmail(jwtToken);
             } catch (ExpiredJwtException e) {
-                handleAuthenticationException(response, "JWT Token expired");
-                return;
+                throw new AuthenticationException("JWT token expired");
             } catch (JwtException e) {
-                handleAuthenticationException(response, "JWT Token invalid");
-                return;
+                throw new AuthenticationException("JWT token invalid");
             }
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
