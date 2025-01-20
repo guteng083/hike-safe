@@ -2,8 +2,7 @@ package com.haven.app.haven.exception;
 
 import com.haven.app.haven.dto.response.ErrorResponse;
 import com.haven.app.haven.dto.response.ValidationErrorResponse;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.*;
 
 @ControllerAdvice
+@Hidden
 //@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalException {
 
@@ -169,4 +169,6 @@ public class GlobalException {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+
 }

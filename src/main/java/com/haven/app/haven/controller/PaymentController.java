@@ -5,12 +5,14 @@ import com.haven.app.haven.dto.request.MidtransWebhookRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.service.PaymentService;
 import com.haven.app.haven.utils.ResponseUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(Endpoint.API_PAYMENT)
+@Tag(name="Payments", description = "APIs for payments midtrans")
 public class PaymentController {
     private final PaymentService paymentService;
 
