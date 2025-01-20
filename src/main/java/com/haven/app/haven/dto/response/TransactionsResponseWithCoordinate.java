@@ -17,6 +17,7 @@ public class TransactionsResponseWithCoordinate {
     private String endDate;
     private String status;
     private Double totalAmount;
+    private String paymentUrl;
     private List<TicketResponse> tickets;
     private String trackerId;
     private List<CoordinateResponse> coordinates;
@@ -44,6 +45,7 @@ public class TransactionsResponseWithCoordinate {
                 .status(transactions.getStatus().toString())
                 .totalAmount(transactions.getTotalAmount())
                 .tickets(ticketResponses)
+                .paymentUrl(transactions.getPaymentUrl())
                 .coordinates(transactions.getCoordinates().stream().map(coordinates1 -> CoordinateResponse.CoordinateToCoordinateResponse(coordinates1)).toList())
                 .trackerId(transactions.getTracker() != null ? transactions.getTracker().getId() : null)
                 .createdAt(transactions.getCreatedAt().toString())

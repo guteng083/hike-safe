@@ -17,12 +17,14 @@ import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.Base64;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void createPaymentLink(String id) {
+    public String createPaymentLink(String id) {
         try {
             Transactions transactions = transactionsRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Transaction not found"));
@@ -101,17 +103,26 @@ public class PaymentServiceImpl implements PaymentService {
 
             System.out.println("encodedKey: " + encodedKey);
 
-            ResponseEntity<?> response = restClient.post().uri(MIDTRANS_URL + "/v1/payment-links")
+            ResponseEntity<Map<String, String>> response = restClient.post().uri(MIDTRANS_URL + "/v1/payment-links")
                     .header("Authorization", "Basic " + encodedKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(paymentLinkRequest)
                     .retrieve()
-                    .toBodilessEntity();
-            if (response.getStatusCode().isError()) {
+                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {});
+
+            if (response.getStatusCode().isError() || response.getBody() == null) {
                 throw new PaymentException("Failed to create payment link");
             }
 
+            String paymentUrl = response.getBody().get("payment_url");
+
+            transactions.setPaymentUrl(paymentUrl);
+
+            transactionsRepository.saveAndFlush(transactions);
+
             log.info("Payment Service: Payment link created successfully");
+
+            return paymentUrl;
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {

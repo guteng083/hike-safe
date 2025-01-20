@@ -4,5 +4,5 @@ import com.haven.app.haven.dto.request.MidtransWebhookRequest;
 
 public interface PaymentService {
     void webhookNotificaction(MidtransWebhookRequest $request);
-    void createPaymentLink(String $id);
+    String createPaymentLink(String $id);
 }
