@@ -12,6 +12,7 @@ import com.haven.app.haven.repository.UsersRepository;
 import com.haven.app.haven.service.CloudinaryService;
 import com.haven.app.haven.service.UsersService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final CloudinaryService cloudinaryService;
@@ -113,6 +115,39 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    public Page<LoginResponse> getAllCustomer(Integer page, Integer size) {
+        try {
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<Users> users = usersRepository.findAllByRole(Role.ROLE_CUSTOMER, pageable);
+
+            log.info("Users Service: Get all customer successfully");
+
+            return users.map(AuthServiceImpl::createLoginResponse);
+        } catch (Exception e) {
+            getError(e);
+            throw new NotFoundException("Get customer failed");
+        }
+    }
+
+    @Override
+    public LoginResponse getCustomerById(String customerId) {
+        try {
+            Users customer = usersRepository.findByIdAndRole(customerId, Role.ROLE_CUSTOMER);
+
+            if(customer == null) {
+                throw new NotFoundException("Customer not found");
+            }
+
+            log.info("Users Service: Get customer by id successfully");
+
+            return AuthServiceImpl.createLoginResponse(customer);
+        } catch (Exception e) {
+            getError(e);
+            throw new NotFoundException("Customer not found");
+        }
+    }
+
+    @Override
     public void updateUserImage(MultipartFile image) throws IOException {
         Users users = getMe();
         String imageUrl = cloudinaryService.uploadImage(image, users.getId());
@@ -127,5 +162,9 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return usersRepository.findByEmail(username);
+    }
+
+    private static void getError(Exception e) {
+        log.error("Error Users Service:{}", e.getMessage());
     }
 }

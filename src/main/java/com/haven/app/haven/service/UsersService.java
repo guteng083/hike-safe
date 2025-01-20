@@ -16,5 +16,7 @@ public interface UsersService  extends UserDetailsService {
     void updateUserDetails(UpdateUserRequest request);
     LoginResponse getStaffById(String staffId);
     Page<LoginResponse> getAllStaff(Integer page, Integer size);
+    Page<LoginResponse> getAllCustomer(Integer page, Integer size);
+    LoginResponse getCustomerById(String customerId);
     void updateUserImage(MultipartFile image) throws IOException;
 }
