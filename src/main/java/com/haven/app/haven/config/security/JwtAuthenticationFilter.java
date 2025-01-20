@@ -12,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UsersService usersService;
@@ -99,9 +101,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (AuthenticationException e){
             handleAuthenticationException(response, e.getMessage());
-        }
-        catch (Exception e) {
-            handleAuthenticationException(response, "Authentication Failed");
+        } catch (Exception e) {
+            log.error("Unknown Error: {}", e.getMessage());
+            handleAuthenticationException(response,"Authentication Failed");
         }
     }
 }

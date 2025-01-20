@@ -115,15 +115,19 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Page<LoginResponse> getAllStaff(SearchRequest searchRequest) {
-        Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
+        try {
+            Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
 
-        Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_STAFF);
+            Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_STAFF);
 
-        Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
+            Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
 
-        log.info("Users Service: Get all staff");
+            log.info("Users Service: Get all staff");
 
-        return users.map(AuthServiceImpl::createLoginResponse);
+            return users.map(AuthServiceImpl::createLoginResponse);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Override
