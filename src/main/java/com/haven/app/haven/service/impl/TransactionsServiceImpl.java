@@ -3,14 +3,10 @@ package com.haven.app.haven.service.impl;
 import com.haven.app.haven.constant.PriceType;
 import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
-import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
-import com.haven.app.haven.dto.response.CommonResponse;
-import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.TransactionsResponse;
-import com.haven.app.haven.dto.response.TransactionsResponseWithCoordinate;
 import com.haven.app.haven.entity.*;
 import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.TrackerDeviceException;
@@ -134,13 +130,13 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public TransactionsResponseWithCoordinate getTransactionById(String id) {
+    public TransactionsResponse getTransactionById(String id) {
         try {
             Transactions transactions = getOne(id);
 
             LogUtils.logSuccess("TransactionsService", "getTransactionById");
 
-            return TransactionsResponseWithCoordinate.toTransactionResponseWithCoordinates(transactions);
+            return TransactionsResponse.toTransactionResponse(transactions);
         } catch (Exception e) {
             LogUtils.getError("TransactionsService.getTransactionById", e);
             if (e instanceof NotFoundException) {

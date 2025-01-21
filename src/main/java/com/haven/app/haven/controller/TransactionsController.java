@@ -61,8 +61,8 @@ public class TransactionsController {
     }
 
     @GetMapping("/{id}")
-    public CommonResponseWithData<TransactionsResponseWithCoordinate> getTransactionById(@PathVariable String id) {
-        TransactionsResponseWithCoordinate transactionsResponse = transactionsService.getTransactionById(id);
+    public CommonResponseWithData<TransactionsResponse> getTransactionById(@PathVariable String id) {
+        TransactionsResponse transactionsResponse = transactionsService.getTransactionById(id);
         return ResponseUtils.responseWithData("Get Transaction By Id", transactionsResponse);
     }
 
@@ -90,7 +90,6 @@ public class TransactionsController {
     @PatchMapping("/{id}/status")
     public CommonResponseWithData<TransactionsResponse> updateTransactionStatus(@PathVariable("id") String id, @RequestBody TransactionsStatusRequest request) {
         TransactionsResponse transactionsResponse = transactionsService.updateTransactionStatus(id, request);
-
         return ResponseUtils.responseWithData("Transaction Updated", transactionsResponse);
     }
 

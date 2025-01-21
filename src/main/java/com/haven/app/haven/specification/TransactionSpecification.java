@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -20,7 +21,6 @@ public class TransactionSpecification {
     public static Specification<Transactions> getSpecification(SearchRequestTransaction searchRequest) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
 
             if (searchRequest != null) {
 
@@ -44,14 +44,22 @@ public class TransactionSpecification {
 
 
                 if (StringUtils.hasText(searchRequest.getStatus())) {
-                    String status = searchRequest.getStatus().trim().toLowerCase();
-                    predicates.add(cb.like(cb.lower(root.get("status").as(String.class)), "%" + status + "%"));
+
+                    List<String> statusList = Arrays.asList(searchRequest.getStatus().split(","));
+
+                    statusList = statusList.stream()
+                            .map(String::trim)
+                            .map(String::toLowerCase)
+                            .toList();
+
+                    statusList.stream().forEach(s -> System.out.println(s));
+
+                    predicates.add(cb.lower(root.get("status").as(String.class)).in(statusList));
                 }
             }
 
 
             query.orderBy(cb.desc(root.get("createdAt")));
-
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

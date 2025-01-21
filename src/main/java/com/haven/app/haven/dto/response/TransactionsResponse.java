@@ -22,6 +22,7 @@ public class TransactionsResponse {
     private Double totalAmount;
     private List<TicketResponse> tickets;
     private TrackerDevicesResponse trackerDevices;
+    private List<CoordinateResponse> coordinates;
     private String createdAt;
     private String updatedAt;
 
@@ -49,6 +50,7 @@ public class TransactionsResponse {
                 .paymentUrl(transactions.getPaymentUrl())
                 .tickets(ticketResponses)
                 .trackerDevices(transactions.getTracker() != null ? TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(transactions.getTracker()) : null)
+                .coordinates(transactions.getCoordinates().stream().map(coordinates1 -> CoordinateResponse.CoordinateToCoordinateResponse(coordinates1)).toList())
                 .createdAt(transactions.getCreatedAt().toString())
                 .updatedAt(transactions.getUpdatedAt().toString())
                 .build();
