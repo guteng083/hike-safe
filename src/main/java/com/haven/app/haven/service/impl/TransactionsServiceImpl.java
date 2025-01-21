@@ -67,7 +67,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             List<Tickets> tickets = new ArrayList<>();
             Double totalAmount = 0.0;
-
+            request.getTickets().stream().forEach(ticket -> System.out.println(ticket.getHikerName()));
             for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
                 Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
 
@@ -89,11 +89,10 @@ public class TransactionsServiceImpl implements TransactionsService {
                         .build();
                 tickets.add(ticket);
                 totalAmount += prices.getPrice();
+                System.out.println(ticket.getHikerName());
             }
 
             transactions.setTickets(tickets);
-
-            ticketRepository.saveAllAndFlush(tickets);
 
             transactions.setTotalAmount(totalAmount);
 
