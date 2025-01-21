@@ -9,6 +9,7 @@ import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.TrackerDeviceException;
 import com.haven.app.haven.repository.TrackerDevicesRepository;
 import com.haven.app.haven.service.TrackerDevicesService;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TrackerDevicesServiceImpl implements TrackerDevicesService {
     private final TrackerDevicesRepository trackerDevicesRepository;
 
@@ -34,11 +34,11 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
 
             trackerDevicesRepository.saveAndFlush(trackerDevices);
 
-            log.info("Tracker Device Service: Tracker device created successfully");
+            LogUtils.logSuccess("TrackerDevicesService", "createTracker");
 
             return TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(trackerDevices);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.createTracker", e);
             throw new TrackerDeviceException("Failed to create tracker device");
         }
     }
@@ -53,11 +53,11 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
                 throw new NotFoundException("Tracker device list not found");
             }
 
-            log.info("Tracker Device Service: Get tracker devices list");
+            LogUtils.logSuccess("TrackerDevicesService", "getTrackerDevices");
 
             return trackerDevices.map(TrackerDevicesResponse::trackerDevicesToTrackerDevicesResponse);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.getTrackerDevices", e);
             if (e instanceof NotFoundException){
                 throw e;
             }
@@ -70,11 +70,11 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
         try {
             TrackerDevices trackerDevices = getOne(id);
 
-            log.info("Tracker Device Service: Get tracker device");
+            LogUtils.logSuccess("TrackerDevicesService", "getTrackerById");
 
             return TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(trackerDevices);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.getTrackerById", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -88,7 +88,7 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
             return trackerDevicesRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Tracker device not found"));
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.getOne", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -104,11 +104,11 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
             trackerDevices.setSerialNumber(trackerDevicesRequest.getSerialNumber());
             trackerDevicesRepository.saveAndFlush(trackerDevices);
 
-            log.info("Tracker Device Service: Tracker device updated successfully");
+            LogUtils.logSuccess("TrackerDevicesService", "updateTracker");
 
             return TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(trackerDevices);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.updateTracker", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -124,11 +124,11 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
 
             trackerDevicesRepository.saveAndFlush(trackerDevices);
 
-            log.info("Tracker Device Service: Tracker device status updated successfully");
+            LogUtils.logSuccess("TrackerDevicesService", "updateStatus");
 
             return TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(trackerDevices);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.updateStatus", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -142,9 +142,9 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
             TrackerDevices trackerDevices = getOne(id);
             trackerDevicesRepository.delete(trackerDevices);
 
-            log.info("Tracker Device Service: Tracker device deleted successfully");
+            LogUtils.logSuccess("TrackerDevicesService", "deleteTracker");
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TrackerDevicesService.deleteTracker", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -161,16 +161,12 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
                 throw new NotFoundException("Tracker device not found");
             }
 
-            log.info("Tracker Device Service: Get tracker device by serial number");
+            LogUtils.logSuccess("TrackerDevicesService", "getBySerialNumber");
 
             return trackerDevices;
         } catch (Exception e) {
-            getError(e);
-            throw new NotFoundException("Tracker device not found");
+            LogUtils.getError("TrackerDevicesService.getBySerialNumber", e);
+            throw new TrackerDeviceException("Failed to get tracker device by serial number");
         }
-    }
-
-    private static void getError(Exception e) {
-        log.error("Error Tracker Devices Service:{}", e.getMessage());
     }
 }

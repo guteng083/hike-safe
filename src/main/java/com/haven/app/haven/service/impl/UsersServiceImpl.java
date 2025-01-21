@@ -13,6 +13,7 @@ import com.haven.app.haven.repository.UsersRepository;
 import com.haven.app.haven.service.CloudinaryService;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.specification.UsersSpecification;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,6 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final CloudinaryService cloudinaryService;
@@ -45,18 +45,32 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Users createUser(Users users) {
-        if (emailExists(users.getEmail())) {
-            Map<String, List<String>> errors = new HashMap<>();
-            errors.put("email", Collections.singletonList("email already exist"));
-            throw new ValidationException("Register failed", errors);
+        try {
+            if (emailExists(users.getEmail())) {
+                Map<String, List<String>> errors = new HashMap<>();
+                errors.put("email", Collections.singletonList("email already exist"));
+                throw new ValidationException("Register failed", errors);
+            }
+
+            LogUtils.logSuccess("UsersService", "createUser");
+
+            return usersRepository.saveAndFlush(users);
+        } catch (Exception e) {
+            LogUtils.getError("UsersService.createUser", e);
+            throw e;
         }
-        return usersRepository.saveAndFlush(users);
     }
 
     @Override
     public Users getMe() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Users) authentication.getPrincipal();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            LogUtils.logSuccess("UsersService", "getMe");
+            return (Users) authentication.getPrincipal();
+        } catch (Exception e) {
+            LogUtils.getError("UsersService.getMe", e);
+            throw e;
+        }
     }
 
     @Override
@@ -94,7 +108,9 @@ public class UsersServiceImpl implements UsersService {
 
             users.setUsersDetail(userDetail);
             updateUser(users);
+            LogUtils.logSuccess("UsersService", "updateUserDetails");
         } catch (Exception e) {
+            LogUtils.getError("UsersService.updateUser", e);
             if (e instanceof ValidationException) {
                 throw new ValidationException("Update user failed", Collections.singletonMap("error", Collections.singletonList(e.getMessage())));
             }
@@ -106,11 +122,19 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public LoginResponse getStaffById(String staffId) {
-        Users staff = usersRepository.findByIdAndRole(staffId, Role.ROLE_STAFF);
-        if (staff == null) {
-            throw new NotFoundException("Staff not found");
+        try {
+            Users staff = usersRepository.findByIdAndRole(staffId, Role.ROLE_STAFF);
+            if (staff == null) {
+                throw new NotFoundException("Staff not found");
+            }
+
+            LogUtils.logSuccess("UsersService", "getStaffById");
+
+            return AuthServiceImpl.createLoginResponse(staff);
+        } catch (Exception e) {
+            LogUtils.getError("UsersService.getStaffById", e);
+            throw e;
         }
-        return AuthServiceImpl.createLoginResponse(staff);
     }
 
     @Override
@@ -122,25 +146,31 @@ public class UsersServiceImpl implements UsersService {
 
             Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
 
-            log.info("Users Service: Get all staff");
+            LogUtils.logSuccess("UsersService", "getAllStaff");
 
             return users.map(AuthServiceImpl::createLoginResponse);
         } catch (Exception e) {
+            LogUtils.getError("UsersService.getAllStaff", e);
             throw e;
         }
     }
 
     @Override
     public Page<LoginResponse> getAllCustomer(SearchRequest searchRequest) {
-        Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
+        try{
+            Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
 
-        Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_CUSTOMER);
+            Specification<Users> usersSpecification = UsersSpecification.getSpecification(searchRequest, Role.ROLE_CUSTOMER);
 
-        Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
+            Page<Users> users = usersRepository.findAll(usersSpecification, pageable);
 
-        log.info("Users Service: Get all customer");
+            LogUtils.logSuccess("UsersService", "getAllCustomer");
 
-        return users.map(AuthServiceImpl::createLoginResponse);
+            return users.map(AuthServiceImpl::createLoginResponse);
+        } catch (Exception e) {
+            LogUtils.getError("UsersService.getAllCustomer", e);
+            throw e;
+        }
     }
 
     @Override
@@ -152,21 +182,28 @@ public class UsersServiceImpl implements UsersService {
                 throw new NotFoundException("Customer not found");
             }
 
-            log.info("Users Service: Get customer by id successfully");
+            LogUtils.logSuccess("UsersService", "getCustomerById");
 
             return AuthServiceImpl.createLoginResponse(customer);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("UsersService.getCustomerById", e);
             throw new NotFoundException("Customer not found");
         }
     }
 
     @Override
     public void updateUserImage(MultipartFile image) throws IOException {
-        Users users = getMe();
-        String imageUrl = cloudinaryService.uploadImage(image, users.getId());
-        users.getUsersDetail().setImageUrl(imageUrl);
-        updateUser(users);
+        try {
+            Users users = getMe();
+            String imageUrl = cloudinaryService.uploadImage(image, users.getId());
+            users.getUsersDetail().setImageUrl(imageUrl);
+            updateUser(users);
+
+            LogUtils.logSuccess("UsersService", "updateUserImage");
+        } catch (Exception e) {
+            LogUtils.getError("UsersService.updateUserImage", e);
+            throw e;
+        }
     }
 
     @Override
@@ -177,9 +214,9 @@ public class UsersServiceImpl implements UsersService {
 
             usersRepository.delete(staff);
 
-            log.info("Users Service: Delete staff successfully");
+            LogUtils.logSuccess("UsersService", "deleteStaff");
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("UsersService.deleteStaff", e);
             throw new NotFoundException("Delete staff failed");
         }
     }
@@ -195,9 +232,9 @@ public class UsersServiceImpl implements UsersService {
             staff.setPassword(passwordEncoder.encode(defaultPassword));
             updateUser(staff);
 
-            log.info("Users Service: Reset password successfully");
+            LogUtils.logSuccess("UsersService", "resetPassword");
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("UsersService.resetPassword", e);
             throw new NotFoundException("Reset password failed");
         }
     }
@@ -209,9 +246,5 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return usersRepository.findByEmail(username);
-    }
-
-    private static void getError(Exception e) {
-        log.error("Error Users Service:{}", e.getMessage());
     }
 }

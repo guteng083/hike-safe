@@ -21,6 +21,7 @@ import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.specification.TransactionSpecification;
 import jakarta.validation.constraints.Null;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TransactionsServiceImpl implements TransactionsService {
     private final TransactionsRepository transactionsRepository;
     private final UsersService usersService;
@@ -87,7 +87,6 @@ public class TransactionsServiceImpl implements TransactionsService {
                         .build();
                 tickets.add(ticket);
                 totalAmount += prices.getPrice();
-                System.out.println(ticket.getHikerName());
             }
 
             transactions.setTickets(tickets);
@@ -96,11 +95,11 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             transactions = transactionsRepository.saveAndFlush(transactions);
 
-            log.info("Transactions Service: Transactions created successfully");
+            LogUtils.logSuccess("TransactionsService", "createTransaction");
 
             return TransactionsResponse.toTransactionResponse(transactions);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.createTransaction", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -122,11 +121,11 @@ public class TransactionsServiceImpl implements TransactionsService {
                 throw new NotFoundException("Transactions not found");
             }
 
-            log.info("Transactions Service: Get transactions list successfully");
+            LogUtils.logSuccess("TransactionsService", "getTransactions");
 
             return transactions.map(TransactionsResponse::toTransactionResponse);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getTransactions", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -139,11 +138,11 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Transactions transactions = getOne(id);
 
-            log.info("Transactions Service: Get transaction by id successfully");
+            LogUtils.logSuccess("TransactionsService", "getTransactionById");
 
             return TransactionsResponse.toTransactionResponse(transactions);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getTransactionById", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -157,11 +156,11 @@ public class TransactionsServiceImpl implements TransactionsService {
             Users user = usersService.getMe();
             Pageable pageable = PageRequest.of(page - 1, size);
             Page<Transactions> transactions = transactionsRepository.findAllByUser(user, pageable);
-            log.info("Transactions Service: Get transactions by user successfully");
+            LogUtils.logSuccess("TransactionsService", "getTransactionByUser");
 
             return transactions.map(TransactionsResponse::toTransactionResponse);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getTransactionByUser", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -174,11 +173,11 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Users user = usersService.getMe();
             List<Transactions> transactions = transactionsRepository.findAllByUser(user);
-            log.info("Transactions Service: Get transactions by user successfully");
+            LogUtils.logSuccess("TransactionsService", "getTransactionByUserWithoutPage");
 
             return transactions.stream().map(TransactionsResponse::toTransactionResponse).collect(Collectors.toList());
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getTransactionByUserWithoutPage", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -195,23 +194,27 @@ public class TransactionsServiceImpl implements TransactionsService {
             TransactionStatus updateStatus = TransactionStatus.fromValue(request.getStatus());
 
             if (updateStatus == TransactionStatus.DONE && status != TransactionStatus.START) {
-                log.info("Transactions Service: Update transaction failed! status must start before update to done");
-                throw new TransactionsException("Update transaction failed! status must start before update to done");
+                TransactionsException e = new TransactionsException("Update transaction failed! status must start before update to done");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
             }
 
             if (updateStatus == TransactionStatus.START && transactions.getTracker() == null) {
-                log.info("Transactions Service: Update transaction failed! tracker device must be assign before update to start");
-                throw new TransactionsException("Update transaction failed! tracker device must be assign before update to start");
+                TransactionsException e = new TransactionsException("Update transaction failed! tracker must be assigned first");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
             }
 
             if (updateStatus == TransactionStatus.BOOKED && !transactions.getPayment().getStatus().equals("settlement")) {
-                log.info("Transactions Service: Update transaction failed! payment not complete yet");
-                throw new TransactionsException("Update transaction failed! payment not complete yet");
+                TransactionsException e = new TransactionsException("Update transaction failed! payment not complete yet");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
             }
 
             if (updateStatus == TransactionStatus.PENDING && transactions.getPaymentUrl() == null) {
-                log.info("Transactions Service: Update transaction failed! payment link must be generate first");
-                throw new TransactionsException("Update transaction failed! payment link must be generate first");
+                TransactionsException e = new TransactionsException("Update transaction failed! payment not complete yet");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
             }
 
             transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
@@ -223,11 +226,11 @@ public class TransactionsServiceImpl implements TransactionsService {
                 trackerDevicesRepository.saveAndFlush(trackerDevices);
             }
 
-            log.info("Transactions Service: Transactions updated successfully");
+            LogUtils.logSuccess("TransactionsService", "updateTransactionStatus");
 
             return TransactionsResponse.toTransactionResponse(transactions);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.updateTransactionStatus", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -246,7 +249,7 @@ public class TransactionsServiceImpl implements TransactionsService {
             return transactionsRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Transactions not found"));
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getOne", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -279,9 +282,9 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             transactionsRepository.saveAndFlush(transactions);
 
-            log.info("Transactions Service: Device assign to transactions successfully");
+            LogUtils.logSuccess("TransactionsService", "deviceAssignment");
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.deviceAssignment", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
@@ -298,22 +301,18 @@ public class TransactionsServiceImpl implements TransactionsService {
                 throw new NotFoundException("Transactions not found");
             }
 
-            log.info("Transactions Service: Get transactions by tracker successfully");
+            LogUtils.logSuccess("TransactionsService", "getTransactionByTracker");
 
             return transactionsList.stream()
                     .filter(transactions -> transactions.getStatus() == TransactionStatus.START)
                     .findFirst()
                     .orElseThrow(() -> new NotFoundException("Transactions not found"));
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("TransactionsService.getTransactionByTracker", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
             throw new NotFoundException("Transactions not found");
         }
-    }
-
-    private static void getError(Exception e) {
-        log.error("Error Transactions Service:{}", e.getMessage());
     }
 }
