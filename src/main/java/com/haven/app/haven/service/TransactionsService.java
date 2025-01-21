@@ -1,11 +1,9 @@
 package com.haven.app.haven.service;
 
-import com.haven.app.haven.dto.request.SearchRequest;
 import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.TransactionsResponse;
-import com.haven.app.haven.dto.response.TransactionsResponseWithCoordinate;
 import com.haven.app.haven.entity.TrackerDevices;
 import com.haven.app.haven.entity.Transactions;
 import org.springframework.data.domain.Page;
