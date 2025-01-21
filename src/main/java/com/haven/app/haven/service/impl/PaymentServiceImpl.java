@@ -118,7 +118,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             transactions.setPaymentUrl(paymentUrl);
 
-            transactions.setStatus(TransactionStatus.UNPAID);
+            transactions.setStatus(TransactionStatus.PENDING);
 
             transactionsRepository.saveAndFlush(transactions);
 

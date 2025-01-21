@@ -60,7 +60,7 @@ public class Transactions {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        status = TransactionStatus.PENDING;
+        status = TransactionStatus.UNPAID;
         tracker = null;
         coordinates = new ArrayList<>();
     }

@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TransactionsServiceImpl implements TransactionsService {
     private final TransactionsRepository transactionsRepository;
-    private final TicketRepository ticketRepository;
     private final UsersService usersService;
     private final PricesRepository pricesRepository;
     private final TrackerDevicesService trackerDevicesService;
@@ -63,11 +62,8 @@ public class TransactionsServiceImpl implements TransactionsService {
                     .endDate(endDate)
                     .build();
 
-            transactionsRepository.saveAndFlush(transactions);
-
             List<Tickets> tickets = new ArrayList<>();
             Double totalAmount = 0.0;
-            request.getTickets().stream().forEach(ticket -> System.out.println(ticket.getHikerName()));
             for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
                 Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
 
