@@ -33,6 +33,7 @@ public class UsersDetail {
     @Column(nullable = false)
     private String phone;
 
+    @Column(nullable = true, name = "image_url")
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
