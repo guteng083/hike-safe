@@ -1,5 +1,6 @@
 package com.haven.app.haven.service.impl;
 
+import com.haven.app.haven.constant.Gender;
 import com.haven.app.haven.constant.Role;
 import com.haven.app.haven.dto.request.ChangePasswordRequest;
 import com.haven.app.haven.dto.request.LoginRequest;
@@ -14,6 +15,7 @@ import com.haven.app.haven.service.JwtService;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,6 +34,10 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UsersService usersService;
     private final JwtService jwtService;
+    @Value("${default.image_url.male}")
+    protected String DEFAULT_IMAGE_URL_MALE;
+    @Value("${default.image_url.female}")
+    protected String DEFAULT_IMAGE_URL_FEMALE;
 
     @Override
     public void registerAdmin(RegisterRequest request, String secretKey) {
@@ -152,6 +158,14 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .build();
 
+        String imageUrl;
+
+        if(request.getGender() == Gender.MALE) {
+            imageUrl = DEFAULT_IMAGE_URL_MALE;
+        } else {
+            imageUrl = DEFAULT_IMAGE_URL_FEMALE;
+        }
+
         UsersDetail usersDetail = UsersDetail.builder()
                 .users(newUser)
                 .fullName(request.getFullName())
@@ -161,6 +175,7 @@ public class AuthServiceImpl implements AuthService {
                 .birthDate(request.getBirthDate())
                 .phone(request.getPhone())
                 .address(request.getAddress())
+                .imageUrl(imageUrl)
                 .build();
 
         newUser.setUsersDetail(usersDetail);
