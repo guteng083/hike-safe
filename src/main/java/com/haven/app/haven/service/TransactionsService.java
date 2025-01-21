@@ -15,7 +15,7 @@ import java.util.List;
 public interface TransactionsService {
     TransactionsResponse createTransaction(TransactionsRequest request);
     Page<TransactionsResponse> getTransactions(SearchRequestTransaction searchRequest);
-    TransactionsResponseWithCoordinate getTransactionById(String id);
+    TransactionsResponse getTransactionById(String id);
     Page<TransactionsResponse> getTransactionByUser(Integer page, Integer size);
     List<TransactionsResponse> getTransactionByUserWithoutPage();
     TransactionsResponse updateTransactionStatus(String id, TransactionsStatusRequest request);

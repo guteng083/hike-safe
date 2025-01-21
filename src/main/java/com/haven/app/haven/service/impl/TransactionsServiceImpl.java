@@ -135,13 +135,13 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public TransactionsResponseWithCoordinate getTransactionById(String id) {
+    public TransactionsResponse getTransactionById(String id) {
         try {
             Transactions transactions = getOne(id);
 
             log.info("Transactions Service: Get transaction by id successfully");
 
-            return TransactionsResponseWithCoordinate.toTransactionResponseWithCoordinates(transactions);
+            return TransactionsResponse.toTransactionResponse(transactions);
         } catch (Exception e) {
             getError(e);
             if (e instanceof NotFoundException) {
