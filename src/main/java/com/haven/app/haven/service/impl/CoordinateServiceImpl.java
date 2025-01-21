@@ -11,6 +11,7 @@ import com.haven.app.haven.repository.CoordinateRepository;
 import com.haven.app.haven.service.CoordinateService;
 import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CoordinateServiceImpl implements CoordinateService {
     private final CoordinateRepository coordinateRepository;
     private final TrackerDevicesService trackerDevicesService;
@@ -44,11 +44,11 @@ public class CoordinateServiceImpl implements CoordinateService {
 
             coordinateRepository.saveAndFlush(coordinates);
 
-            log.info("Coordinate Service: Coordinate successfully added");
+            LogUtils.logSuccess("CoordinateService", "addCoordinate");
 
             return CoordinateResponse.CoordinateToCoordinateResponse(coordinates);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("CoordinateService.addCoordinate", e);
             throw new CoordinateException("Failed to add coordinate");
         }
     }
@@ -60,20 +60,15 @@ public class CoordinateServiceImpl implements CoordinateService {
 
             Page<Coordinates> coordinates = coordinateRepository.findAllByTransaction_Id(pageable, transactionId);
 
-            log.info("Coordinate Service: Get coordinate list successfully");
+            LogUtils.logSuccess("CoordinateService", "getCoordinate");
 
             return coordinates.map(CoordinateResponse::CoordinateToCoordinateResponse);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("CoordinateService.getCoordinate", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
             throw new CoordinateException("Failed to get coordinate list");
         }
     }
-
-    private static void getError(Exception e) {
-        log.error("Error Coordinate Service:{}", e.getMessage());
-    }
-
 }

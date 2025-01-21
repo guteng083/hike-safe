@@ -20,7 +20,7 @@ public class PaymentController {
     @PostMapping(path="/notification")
     public CommonResponse webhookNotificaction(@RequestBody MidtransWebhookRequest request)
     {
-        paymentService.webhookNotificaction(request);
+        paymentService.webhookNotification(request);
 
         return ResponseUtils.response("Payment notification success");
     }
