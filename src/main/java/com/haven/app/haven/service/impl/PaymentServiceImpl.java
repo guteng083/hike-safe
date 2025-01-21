@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .midtransOrderId(request.getTransaction_id())
                     .fraudStatus(request.getFraud_status())
                     .build();
-
+            transactions.setPayment(payment);
             transactions.setStatus(TransactionStatus.BOOKED);
             transactionsRepository.save(transactions);
 

@@ -17,7 +17,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "transaction_id")
     private Transactions transactions;
 

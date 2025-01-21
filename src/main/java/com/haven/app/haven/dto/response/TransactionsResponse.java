@@ -21,7 +21,7 @@ public class TransactionsResponse {
     private String paymentUrl;
     private Double totalAmount;
     private List<TicketResponse> tickets;
-    private String trackerId;
+    private TrackerDevicesResponse trackerDevices;
     private String createdAt;
     private String updatedAt;
 
@@ -48,7 +48,7 @@ public class TransactionsResponse {
                 .totalAmount(transactions.getTotalAmount())
                 .paymentUrl(transactions.getPaymentUrl())
                 .tickets(ticketResponses)
-                .trackerId(transactions.getTracker() != null ? transactions.getTracker().getId() : null)
+                .trackerDevices(transactions.getTracker() != null ? TrackerDevicesResponse.trackerDevicesToTrackerDevicesResponse(transactions.getTracker()) : null)
                 .createdAt(transactions.getCreatedAt().toString())
                 .updatedAt(transactions.getUpdatedAt().toString())
                 .build();

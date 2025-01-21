@@ -4,6 +4,7 @@ import com.haven.app.haven.constant.PriceType;
 import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
 import com.haven.app.haven.dto.request.SearchRequest;
+import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
@@ -19,6 +20,7 @@ import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.specification.TransactionSpecification;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -107,7 +109,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public Page<TransactionsResponse> getTransactions(SearchRequest searchRequest) {
+    public Page<TransactionsResponse> getTransactions(SearchRequestTransaction searchRequest) {
         try {
             Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
 
@@ -189,6 +191,29 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Transactions transactions = getOne(id);
 
+            TransactionStatus status = transactions.getStatus();
+            TransactionStatus updateStatus = TransactionStatus.fromValue(request.getStatus());
+
+            if (updateStatus == TransactionStatus.DONE && status != TransactionStatus.START) {
+                log.info("Transactions Service: Update transaction failed! status must start before update to done");
+                throw new TransactionsException("Update transaction failed! status must start before update to done");
+            }
+
+            if (updateStatus == TransactionStatus.START && transactions.getTracker() == null) {
+                log.info("Transactions Service: Update transaction failed! tracker device must be assign before update to start");
+                throw new TransactionsException("Update transaction failed! tracker device must be assign before update to start");
+            }
+
+            if (updateStatus == TransactionStatus.BOOKED && !transactions.getPayment().getStatus().equals("settlement")) {
+                log.info("Transactions Service: Update transaction failed! payment not complete yet");
+                throw new TransactionsException("Update transaction failed! payment not complete yet");
+            }
+
+            if (updateStatus == TransactionStatus.PENDING && transactions.getPaymentUrl() == null) {
+                log.info("Transactions Service: Update transaction failed! payment link must be generate first");
+                throw new TransactionsException("Update transaction failed! payment link must be generate first");
+            }
+
             transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
             transactions = transactionsRepository.saveAndFlush(transactions);
 
@@ -206,7 +231,11 @@ public class TransactionsServiceImpl implements TransactionsService {
             if (e instanceof NotFoundException) {
                 throw e;
             }
-            throw new TransactionsException("Failed to update transactions");
+            if (e instanceof NullPointerException) {
+                throw new TransactionsException("Update transaction failed! payment not complete yet");
+
+            }
+            throw e;
         }
 
     }
@@ -230,7 +259,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Transactions transactions = getOne(id);
 
-            if((transactions.getStatus() == TransactionStatus.CANCELLED) || (transactions.getStatus() == TransactionStatus.PENDING)) {
+            if((transactions.getStatus() == TransactionStatus.CANCELLED) || (transactions.getStatus() == TransactionStatus.PENDING) || (transactions.getStatus() == TransactionStatus.UNPAID)) {
                 throw new TransactionsException("Transactions have not booked");
             }
 

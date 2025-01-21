@@ -56,6 +56,9 @@ public class Transactions {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "transactions", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private Payment payment;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

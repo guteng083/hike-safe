@@ -2,6 +2,7 @@ package com.haven.app.haven.controller;
 
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.SearchRequest;
+import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.*;
@@ -37,7 +38,7 @@ public class TransactionsController {
     @GetMapping
     public PageResponse<List<TransactionsResponse>> getAllTransactions(
             @RequestParam(name = "search", required = false) String search,
-
+            @RequestParam(name = "status", required = false) String status,
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
@@ -48,8 +49,9 @@ public class TransactionsController {
             @Min(value = 1, message = "Page size cannot be zero or negative")
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        SearchRequest searchRequest = SearchRequest.builder()
+        SearchRequestTransaction searchRequest = SearchRequestTransaction.builder()
                 .search(search)
+                .status(status)
                 .page(page)
                 .size(size)
                 .build();
