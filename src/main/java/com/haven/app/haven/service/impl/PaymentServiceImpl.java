@@ -47,21 +47,30 @@ public class PaymentServiceImpl implements PaymentService {
             Transactions transactions = transactionsRepository.findById(orderId)
                     .orElseThrow(() -> new NotFoundException("Transaction not found"));
 
-            Payment payment = Payment.builder()
-                    .transactions(transactions)
-                    .settlementTime(request.getTransaction_time())
-                    .paymentMethod(request.getPayment_type())
-                    .amount(Double.parseDouble(request.getGross_amount()))
-                    .status(request.getTransaction_status())
-                    .orderId(request.getOrder_id())
-                    .midtransOrderId(request.getTransaction_id())
-                    .fraudStatus(request.getFraud_status())
-                    .build();
-            transactions.setPayment(payment);
-            transactions.setStatus(TransactionStatus.BOOKED);
-            transactionsRepository.save(transactions);
+            Payment payment = paymentRepository.findByOrderId(request.getOrder_id());
+            if (payment != null) {
+                payment.setStatus(request.getTransaction_status());
+                paymentRepository.save(payment);
+            } else {
+                Payment newPayment = Payment.builder()
+                        .transactions(transactions)
+                        .settlementTime(request.getTransaction_time())
+                        .paymentMethod(request.getPayment_type())
+                        .amount(Double.parseDouble(request.getGross_amount()))
+                        .status(request.getTransaction_status())
+                        .orderId(request.getOrder_id())
+                        .midtransOrderId(request.getTransaction_id())
+                        .fraudStatus(request.getFraud_status())
+                        .build();
 
-            paymentRepository.save(payment);
+                transactions.setPayment(newPayment);
+            }
+
+            if (request.getTransaction_status().equalsIgnoreCase("settlement"))
+            {
+                transactions.setStatus(TransactionStatus.BOOKED);
+            }
+            transactionsRepository.save(transactions);
             log.info("Payment Service: Payment success");
         } catch (Exception e) {
             getError(e);
