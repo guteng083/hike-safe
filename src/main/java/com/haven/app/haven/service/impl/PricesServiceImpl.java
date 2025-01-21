@@ -6,8 +6,10 @@ import com.haven.app.haven.dto.response.PricesResponse;
 import com.haven.app.haven.entity.Prices;
 import com.haven.app.haven.exception.CoordinateException;
 import com.haven.app.haven.exception.NotFoundException;
+import com.haven.app.haven.exception.PriceException;
 import com.haven.app.haven.repository.PricesRepository;
 import com.haven.app.haven.service.PricesService;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PricesServiceImpl implements PricesService {
     private final PricesRepository pricesRepository;
 
@@ -32,12 +33,12 @@ public class PricesServiceImpl implements PricesService {
 
             pricesRepository.save(price);
 
-            log.info("Price Service: Price created successfully");
+            LogUtils.logSuccess("PricesService", "createPrices");
 
             return PricesResponse.toPricesResponse(price);
         } catch (Exception e) {
-            getError(e);
-            throw new CoordinateException("Failed to create prices");
+            LogUtils.getError("PricesService.createPrices", e);
+            throw new PriceException("Failed to create prices");
         }
     }
 
@@ -50,15 +51,15 @@ public class PricesServiceImpl implements PricesService {
 
             pricesRepository.save(price);
 
-            log.info("Price Service: Price updated successfully");
+            LogUtils.logSuccess("PricesService", "updatePrices");
 
             return PricesResponse.toPricesResponse(price);
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("PricesService.updatePrices", e);
             if (e instanceof NotFoundException){
                 throw e;
             }
-            throw new CoordinateException("Failed to update prices");
+            throw new PriceException("Failed to update prices");
         }
     }
 
@@ -71,19 +72,15 @@ public class PricesServiceImpl implements PricesService {
                 throw new NotFoundException("Prices list not found");
             }
 
-            log.info("Prices Service: Get prices list successfully");
+            LogUtils.logSuccess("PricesService", "getPrices");
 
             return prices.stream().map(PricesResponse::toPricesResponse).toList();
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("PricesService.getPrices", e);
             if(e instanceof NotFoundException){
                 throw new NotFoundException("Prices list not found");
             }
-            throw new CoordinateException("Failed to get prices list");
+            throw new PriceException("Failed to get prices list");
         }
-    }
-
-    private static void getError(Exception e) {
-        log.error("Error Price Service:{}", e.getMessage());
     }
 }

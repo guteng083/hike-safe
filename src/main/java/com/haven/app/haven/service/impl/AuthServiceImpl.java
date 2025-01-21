@@ -12,6 +12,7 @@ import com.haven.app.haven.exception.ValidationException;
 import com.haven.app.haven.service.AuthService;
 import com.haven.app.haven.service.JwtService;
 import com.haven.app.haven.service.UsersService;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,24 +35,42 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void registerAdmin(RegisterRequest request, String secretKey) {
-        String secretAdminKey = "1234567890";
-        if (secretKey.equals(secretAdminKey)) {
-            usersService.createUser(createUser(request, Role.ROLE_ADMIN));
-        } else {
-            Map<String, List<String>> errors = new HashMap<>();
-            errors.put("SecretKey", Collections.singletonList("SecretKey not match"));
-            throw new ValidationException("Register failed", errors);
+        try {
+            String secretAdminKey = "1234567890";
+            if (secretKey.equals(secretAdminKey)) {
+                usersService.createUser(createUser(request, Role.ROLE_ADMIN));
+            } else {
+                Map<String, List<String>> errors = new HashMap<>();
+                errors.put("SecretKey", Collections.singletonList("SecretKey not match"));
+                throw new ValidationException("Register failed", errors);
+            }
+
+            LogUtils.logSuccess("AuthService", "registerAdmin");
+        } catch (Exception e) {
+            LogUtils.getError("AuthService.registerAdmin", e);
         }
     }
 
     @Override
     public void registerStaff(RegisterRequest request) {
-        usersService.createUser(createUser(request, Role.ROLE_STAFF));
+        try {
+            usersService.createUser(createUser(request, Role.ROLE_STAFF));
+
+            LogUtils.logSuccess("AuthService", "registerStaff");
+        } catch (Exception e) {
+            LogUtils.getError("AuthService.registerStaff", e);
+        }
     }
 
     @Override
     public void registerCustomer(RegisterRequest request) {
-        usersService.createUser(createUser(request, Role.ROLE_CUSTOMER));
+        try {
+            usersService.createUser(createUser(request, Role.ROLE_CUSTOMER));
+
+            LogUtils.logSuccess("AuthService", "registerCustomer");
+        } catch (Exception e) {
+            LogUtils.getError("AuthService.registerCustomer", e);
+        }
     }
 
     @Override
@@ -64,8 +83,12 @@ public class AuthServiceImpl implements AuthService {
             Users user = (Users) authentication.getPrincipal();
             user.setAccessToken(jwtService.generateToken(user));
             usersService.updateUser(user);
+
+            LogUtils.logSuccess("AuthService", "login");
+
             return createLoginResponse(user);
         } catch (org.springframework.security.core.AuthenticationException e) {
+            LogUtils.getError("AuthService.login", e);
             throw new AuthenticationException("Login Failed");
         }
 
@@ -73,26 +96,37 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void changePassword(ChangePasswordRequest request) {
-        Users user = usersService.getMe();
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            Map<String, List<String>> errors = new HashMap<>();
-            errors.put("Password", Collections.singletonList("password incorrect"));
-            throw new ValidationException("Register failed", errors);
-        }
+        try {
+            Users user = usersService.getMe();
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                Map<String, List<String>> errors = new HashMap<>();
+                errors.put("Password", Collections.singletonList("password incorrect"));
+                throw new ValidationException("Register failed", errors);
+            }
 
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            Map<String, List<String>> errors = new HashMap<>();
-            errors.put("Password", Collections.singletonList("New Password and Confirm Password do not match"));
-            throw new ValidationException("Register failed", errors);
-        }
+            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+                Map<String, List<String>> errors = new HashMap<>();
+                errors.put("Password", Collections.singletonList("New Password and Confirm Password do not match"));
+                throw new ValidationException("Register failed", errors);
+            }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        usersService.updateUser(user);
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            usersService.updateUser(user);
+
+            LogUtils.logSuccess("AuthService", "changePassword");
+        } catch (Exception e) {
+            LogUtils.getError("AuthService.changePassword", e);
+        }
     }
 
     @Override
     public LoginResponse getMe() {
-        return createLoginResponse(usersService.getMe());
+        try {
+            return createLoginResponse(usersService.getMe());
+        } catch (Exception e) {
+            LogUtils.getError("AuthService.getMe", e);
+            throw e;
+        }
     }
 
     public static LoginResponse createLoginResponse(Users user) {
