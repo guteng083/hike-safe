@@ -4,6 +4,7 @@ import com.haven.app.haven.constant.PriceType;
 import com.haven.app.haven.constant.TrackerStatus;
 import com.haven.app.haven.constant.TransactionStatus;
 import com.haven.app.haven.dto.request.SearchRequest;
+import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.request.TransactionsRequest;
 import com.haven.app.haven.dto.request.TransactionsStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
@@ -19,6 +20,7 @@ import com.haven.app.haven.service.TrackerDevicesService;
 import com.haven.app.haven.service.TransactionsService;
 import com.haven.app.haven.service.UsersService;
 import com.haven.app.haven.specification.TransactionSpecification;
+import jakarta.validation.constraints.Null;
 import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +42,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionsServiceImpl implements TransactionsService {
     private final TransactionsRepository transactionsRepository;
-    private final TicketRepository ticketRepository;
     private final UsersService usersService;
     private final PricesRepository pricesRepository;
     private final TrackerDevicesService trackerDevicesService;
@@ -63,11 +64,8 @@ public class TransactionsServiceImpl implements TransactionsService {
                     .endDate(endDate)
                     .build();
 
-            transactionsRepository.saveAndFlush(transactions);
-
             List<Tickets> tickets = new ArrayList<>();
             Double totalAmount = 0.0;
-
             for(TransactionsRequest.TicketRequest ticketRequest : request.getTickets()) {
                 Prices prices = pricesRepository.findByPriceType(PriceType.getPriceType(ticketRequest.getIdentificationType()));
 
@@ -93,8 +91,6 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             transactions.setTickets(tickets);
 
-            ticketRepository.saveAllAndFlush(tickets);
-
             transactions.setTotalAmount(totalAmount);
 
             transactions = transactionsRepository.saveAndFlush(transactions);
@@ -112,7 +108,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public Page<TransactionsResponse> getTransactions(SearchRequest searchRequest) {
+    public Page<TransactionsResponse> getTransactions(SearchRequestTransaction searchRequest) {
         try {
             Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
 
@@ -194,6 +190,33 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Transactions transactions = getOne(id);
 
+            TransactionStatus status = transactions.getStatus();
+            TransactionStatus updateStatus = TransactionStatus.fromValue(request.getStatus());
+
+            if (updateStatus == TransactionStatus.DONE && status != TransactionStatus.START) {
+                TransactionsException e = new TransactionsException("Update transaction failed! status must start before update to done");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
+            }
+
+            if (updateStatus == TransactionStatus.START && transactions.getTracker() == null) {
+                TransactionsException e = new TransactionsException("Update transaction failed! tracker must be assigned first");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
+            }
+
+            if (updateStatus == TransactionStatus.BOOKED && !transactions.getPayment().getStatus().equals("settlement")) {
+                TransactionsException e = new TransactionsException("Update transaction failed! payment not complete yet");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
+            }
+
+            if (updateStatus == TransactionStatus.PENDING && transactions.getPaymentUrl() == null) {
+                TransactionsException e = new TransactionsException("Update transaction failed! payment not complete yet");
+                LogUtils.getError("Transaction Service", e);
+                throw e;
+            }
+
             transactions.setStatus(TransactionStatus.fromValue(request.getStatus()));
             transactions = transactionsRepository.saveAndFlush(transactions);
 
@@ -211,7 +234,11 @@ public class TransactionsServiceImpl implements TransactionsService {
             if (e instanceof NotFoundException) {
                 throw e;
             }
-            throw new TransactionsException("Failed to update transactions");
+            if (e instanceof NullPointerException) {
+                throw new TransactionsException("Update transaction failed! payment not complete yet");
+
+            }
+            throw e;
         }
 
     }
@@ -235,7 +262,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         try {
             Transactions transactions = getOne(id);
 
-            if((transactions.getStatus() == TransactionStatus.CANCELLED) || (transactions.getStatus() == TransactionStatus.PENDING)) {
+            if((transactions.getStatus() == TransactionStatus.CANCELLED) || (transactions.getStatus() == TransactionStatus.PENDING) || (transactions.getStatus() == TransactionStatus.UNPAID)) {
                 throw new TransactionsException("Transactions have not booked");
             }
 
