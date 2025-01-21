@@ -14,6 +14,7 @@ import com.haven.app.haven.repository.PaymentRepository;
 import com.haven.app.haven.repository.TransactionsRepository;
 import com.haven.app.haven.service.PaymentService;
 import com.haven.app.haven.service.UsersService;
+import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,11 +29,9 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final TransactionsRepository transactionsRepository;
-    private final UsersService usersService;
 
     @Value("${midtrans.base-url}")
     protected String MIDTRANS_URL;
@@ -41,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
     protected String MIDTRANS_SECRET_KEY;
 
     @Override
-    public void webhookNotificaction(MidtransWebhookRequest request) {
+    public void webhookNotification(MidtransWebhookRequest request) {
         try{
             String orderId = extractUUID(request.getOrder_id());
             Transactions transactions = transactionsRepository.findById(orderId)
@@ -71,9 +70,10 @@ public class PaymentServiceImpl implements PaymentService {
                 transactions.setStatus(TransactionStatus.BOOKED);
             }
             transactionsRepository.save(transactions);
-            log.info("Payment Service: Payment success");
+
+            LogUtils.logSuccess("PaymentService", "webHookNotification");
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("PaymentService.webHookNotification", e);
             if(e instanceof NotFoundException) {
                 throw e;
             }
@@ -131,21 +131,17 @@ public class PaymentServiceImpl implements PaymentService {
 
             transactionsRepository.saveAndFlush(transactions);
 
-            log.info("Payment Service: Payment link created successfully");
+            LogUtils.logSuccess("PaymentService", "createPaymentLink");
 
             return paymentUrl;
         } catch (Exception e) {
-            getError(e);
+            LogUtils.getError("PaymentService.createPaymentLink", e);
             if (e instanceof NotFoundException) {
                 throw e;
             }
             throw new PaymentException("Failed to create payment link");
         }
 
-    }
-
-    private static void getError(Exception e) {
-        log.error("Error Payment Service:{}", e.getMessage());
     }
 
     private static String extractUUID(String input) {
