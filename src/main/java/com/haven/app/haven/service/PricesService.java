@@ -11,4 +11,5 @@ public interface PricesService {
     PricesResponse createPrices(PricesRequest prices);
     PricesResponse updatePrices(String id, PricesRequest prices);
     Page<PricesResponse> getPrices(SearchRequestTransaction searchRequest);
+    void deletePrice(String id);
 }

@@ -89,4 +89,15 @@ public class PricesServiceImpl implements PricesService {
             throw new PriceException("Failed to get prices list");
         }
     }
+
+    @Override
+    public void deletePrice(String id) {
+        try {
+            pricesRepository.deleteById(id);
+            LogUtils.logSuccess("PricesService", "deletePrice");
+        } catch (Exception e){
+            LogUtils.getError("PricesService.deletePrice", e);
+            throw new PriceException("Failed to delete price");
+        }
+    }
 }
