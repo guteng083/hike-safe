@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 @RestController
@@ -36,7 +37,8 @@ public class TransactionsController {
     }
 
     @GetMapping
-    public PageResponse<List<TransactionsResponse>> getAllTransactions(
+    public ResponseEntity<?> getAllTransactions(
+            @RequestParam(name = "pagination", required = false, defaultValue = "true") boolean pagination,
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "status", required = false) String status,
             @Valid
@@ -55,9 +57,13 @@ public class TransactionsController {
                 .page(page)
                 .size(size)
                 .build();
-
-        Page<TransactionsResponse> transactionsResponses = transactionsService.getTransactions(searchRequest);
-        return ResponseUtils.responseWithPage("Get All Transactions", transactionsResponses);
+        if (pagination) {
+            Page<TransactionsResponse> transactionsResponses = transactionsService.getTransactions(searchRequest);
+            return ResponseEntity.ok(ResponseUtils.responseWithPage("Get All Transactions", transactionsResponses));
+        } else {
+            List<TransactionsResponse> transactionsResponses = transactionsService.getTransactionsWithoutPage(searchRequest);
+            return ResponseEntity.ok(ResponseUtils.responseWithData("Get All Transactions", transactionsResponses));
+        }
     }
 
     @GetMapping("/{id}")
