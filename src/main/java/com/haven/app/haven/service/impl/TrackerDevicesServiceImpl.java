@@ -49,10 +49,6 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
             Pageable pageable = PageRequest.of(page - 1, size);
             Page<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll(pageable);
 
-            if (trackerDevices.isEmpty()){
-                throw new NotFoundException("Tracker device list not found");
-            }
-
             LogUtils.logSuccess("TrackerDevicesService", "getTrackerDevices");
 
             return trackerDevices.map(TrackerDevicesResponse::trackerDevicesToTrackerDevicesResponse);

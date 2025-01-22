@@ -2,6 +2,7 @@ package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.constant.PriceType;
 import com.haven.app.haven.dto.request.PricesRequest;
+import com.haven.app.haven.dto.request.SearchRequestTransaction;
 import com.haven.app.haven.dto.response.PricesResponse;
 import com.haven.app.haven.entity.Prices;
 import com.haven.app.haven.exception.CoordinateException;
@@ -9,9 +10,14 @@ import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.PriceException;
 import com.haven.app.haven.repository.PricesRepository;
 import com.haven.app.haven.service.PricesService;
+import com.haven.app.haven.specification.PriceSpecification;
 import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -64,17 +70,17 @@ public class PricesServiceImpl implements PricesService {
     }
 
     @Override
-    public List<PricesResponse> getPrices() {
+    public Page<PricesResponse> getPrices(SearchRequestTransaction searchRequest) {
         try {
-            List<Prices> prices = pricesRepository.findAll();
 
-            if(prices.isEmpty()) {
-                throw new NotFoundException("Prices list not found");
-            }
+            Pageable pageable = PageRequest.of(searchRequest.getPage()-1, searchRequest.getSize());
+
+            Specification<Prices> specification  = PriceSpecification.getSpecification(searchRequest);
+            Page<Prices> prices = pricesRepository.findAll(specification,pageable);
 
             LogUtils.logSuccess("PricesService", "getPrices");
 
-            return prices.stream().map(PricesResponse::toPricesResponse).toList();
+            return prices.map(PricesResponse::toPricesResponse);
         } catch (Exception e) {
             LogUtils.getError("PricesService.getPrices", e);
             if(e instanceof NotFoundException){
