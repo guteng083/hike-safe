@@ -12,6 +12,7 @@ import java.util.List;
 public interface TrackerDevicesService {
     TrackerDevicesResponse createTracker(TrackerDevicesRequest trackerDevicesRequest);
     Page<TrackerDevicesResponse> getTrackerDevices(SearchTrackerDeviceRequest searchRequest);
+    List<TrackerDevicesResponse> getTrackerDevicesWithoutPage(SearchTrackerDeviceRequest searchRequest);
     TrackerDevicesResponse getTrackerById(String id);
     TrackerDevices getOne(String id);
     TrackerDevicesResponse updateTracker(String id, TrackerDevicesRequest trackerDevicesRequest);
