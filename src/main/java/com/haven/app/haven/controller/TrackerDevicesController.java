@@ -1,6 +1,7 @@
 package com.haven.app.haven.controller;
 
 import com.haven.app.haven.constant.Constant;
+import com.haven.app.haven.dto.request.SearchTrackerDeviceRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesStatusRequest;
 import com.haven.app.haven.dto.response.CommonResponse;
@@ -36,6 +37,8 @@ public class TrackerDevicesController {
 
     @GetMapping
     public PageResponse<List<TrackerDevicesResponse>> getAllTrackerDevices(
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "status", required = false) String status,
             @Valid
             @NotNull(message = "Page number is required")
             @Min(value = 1, message = "Page number cannot be zero negative")
@@ -46,7 +49,13 @@ public class TrackerDevicesController {
             @Min(value = 1, message = "Page size cannot be zero or negative")
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        Page<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices(page, size);
+        SearchTrackerDeviceRequest searchRequest = SearchTrackerDeviceRequest.builder()
+                .page(page)
+                .size(size)
+                .search(search)
+                .status(status)
+                .build();
+        Page<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices(searchRequest);
         return ResponseUtils.responseWithPage("Tracker Device List", trackerDevicesResponses);
     }
 

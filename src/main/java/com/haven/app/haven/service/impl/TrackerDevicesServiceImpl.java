@@ -1,6 +1,7 @@
 package com.haven.app.haven.service.impl;
 
 import com.haven.app.haven.constant.TrackerStatus;
+import com.haven.app.haven.dto.request.SearchTrackerDeviceRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesRequest;
 import com.haven.app.haven.dto.request.TrackerDevicesStatusRequest;
 import com.haven.app.haven.dto.response.TrackerDevicesResponse;
@@ -9,12 +10,14 @@ import com.haven.app.haven.exception.NotFoundException;
 import com.haven.app.haven.exception.TrackerDeviceException;
 import com.haven.app.haven.repository.TrackerDevicesRepository;
 import com.haven.app.haven.service.TrackerDevicesService;
+import com.haven.app.haven.specification.TrackerDeviceSpecification;
 import com.haven.app.haven.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,10 +47,14 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
     }
 
     @Override
-    public Page<TrackerDevicesResponse> getTrackerDevices(Integer page, Integer size) {
+    public Page<TrackerDevicesResponse> getTrackerDevices(SearchTrackerDeviceRequest searchRequest) {
         try {
-            Pageable pageable = PageRequest.of(page - 1, size);
-            Page<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll(pageable);
+            Pageable pageable = PageRequest.of(searchRequest.getPage() - 1, searchRequest.getSize());
+
+            Specification<TrackerDevices> specification = TrackerDeviceSpecification.getSpecification(searchRequest);
+
+
+            Page<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll(specification, pageable);
 
             LogUtils.logSuccess("TrackerDevicesService", "getTrackerDevices");
 
@@ -153,7 +160,7 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
         try {
             TrackerDevices trackerDevices = trackerDevicesRepository.findBySerialNumber(serialNumber);
 
-            if(trackerDevices == null) {
+            if (trackerDevices == null) {
                 throw new NotFoundException("Tracker device not found");
             }
 
