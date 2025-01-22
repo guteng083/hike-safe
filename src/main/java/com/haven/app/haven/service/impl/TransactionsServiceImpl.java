@@ -113,10 +113,6 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             Page<Transactions> transactions = transactionsRepository.findAll(specification,pageable);
 
-            if(transactions.isEmpty()) {
-                throw new NotFoundException("Transactions not found");
-            }
-
             LogUtils.logSuccess("TransactionsService", "getTransactions");
 
             return transactions.map(TransactionsResponse::toTransactionResponse);
