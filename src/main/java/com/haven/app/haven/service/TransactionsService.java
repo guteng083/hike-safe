@@ -20,4 +20,5 @@ public interface TransactionsService {
     Transactions getOne(String id);
     void deviceAssignment(String id, String deviceId);
     Transactions getTransactionByTracker(TrackerDevices trackerDevices);
+    List<TransactionsResponse> getTransactionsWithoutPage(SearchRequestTransaction searchRequest);
 }

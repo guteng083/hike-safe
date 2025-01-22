@@ -69,6 +69,25 @@ public class TrackerDevicesServiceImpl implements TrackerDevicesService {
     }
 
     @Override
+    public List<TrackerDevicesResponse> getTrackerDevicesWithoutPage(SearchTrackerDeviceRequest searchRequest) {
+        try {
+            Specification<TrackerDevices> specification = TrackerDeviceSpecification.getSpecification(searchRequest);
+
+            List<TrackerDevices> trackerDevices = trackerDevicesRepository.findAll(specification);
+
+            LogUtils.logSuccess("TrackerDevicesService", "getTrackerDevices");
+
+            return trackerDevices.stream().map(TrackerDevicesResponse::trackerDevicesToTrackerDevicesResponse).toList();
+        } catch (Exception e) {
+            LogUtils.getError("TrackerDevicesService.getTrackerDevices", e);
+            if (e instanceof NotFoundException){
+                throw e;
+            }
+            throw new TrackerDeviceException("Failed to get tracker device list");
+        }
+    }
+
+    @Override
     public TrackerDevicesResponse getTrackerById(String id) {
         try {
             TrackerDevices trackerDevices = getOne(id);

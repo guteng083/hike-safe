@@ -113,10 +113,6 @@ public class TransactionsServiceImpl implements TransactionsService {
 
             Page<Transactions> transactions = transactionsRepository.findAll(specification,pageable);
 
-            if(transactions.isEmpty()) {
-                throw new NotFoundException("Transactions not found");
-            }
-
             LogUtils.logSuccess("TransactionsService", "getTransactions");
 
             return transactions.map(TransactionsResponse::toTransactionResponse);
@@ -309,6 +305,27 @@ public class TransactionsServiceImpl implements TransactionsService {
                 throw e;
             }
             throw new NotFoundException("Transactions not found");
+        }
+    }
+
+    @Override
+    public List<TransactionsResponse> getTransactionsWithoutPage(SearchRequestTransaction searchRequest) {
+        try {
+
+            Specification<Transactions> specification =
+                    TransactionSpecification.getSpecification(searchRequest);
+
+            List<Transactions> transactions = transactionsRepository.findAll(specification);
+
+            LogUtils.logSuccess("TransactionsService", "getTransactions");
+
+            return transactions.stream().map(TransactionsResponse::toTransactionResponse).toList();
+        } catch (Exception e) {
+            LogUtils.getError("TransactionsService.getTransactions", e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new TransactionsException("Failed to get transactions list");
         }
     }
 }

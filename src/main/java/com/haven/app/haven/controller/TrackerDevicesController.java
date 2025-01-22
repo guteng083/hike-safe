@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,8 @@ public class TrackerDevicesController {
     }
 
     @GetMapping
-    public PageResponse<List<TrackerDevicesResponse>> getAllTrackerDevices(
+    public ResponseEntity<?> getAllTrackerDevices(
+            @RequestParam(required = false, defaultValue = "true") boolean pagination,
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "status", required = false) String status,
             @Valid
@@ -55,8 +57,14 @@ public class TrackerDevicesController {
                 .search(search)
                 .status(status)
                 .build();
-        Page<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices(searchRequest);
-        return ResponseUtils.responseWithPage("Tracker Device List", trackerDevicesResponses);
+        if (pagination) {
+            Page<TrackerDevicesResponse> trackerDevicesResponses = trackerDevicesService.getTrackerDevices(searchRequest);
+            return ResponseEntity.ok(ResponseUtils.responseWithPage("Tracker Device List", trackerDevicesResponses));
+        } else {
+            List<TrackerDevicesResponse> trackerDevicesResponseList= trackerDevicesService.getTrackerDevicesWithoutPage(searchRequest);
+            return  ResponseEntity.ok(ResponseUtils.responseWithData("Tracker Device List", trackerDevicesResponseList));
+        }
+
     }
 
     @GetMapping(path = "/{id}")
