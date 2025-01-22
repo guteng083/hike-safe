@@ -3,6 +3,7 @@ package com.haven.app.haven.controller;
 import com.haven.app.haven.constant.Constant;
 import com.haven.app.haven.dto.request.PricesRequest;
 import com.haven.app.haven.dto.request.SearchRequestTransaction;
+import com.haven.app.haven.dto.response.CommonResponse;
 import com.haven.app.haven.dto.response.CommonResponseWithData;
 import com.haven.app.haven.dto.response.PageResponse;
 import com.haven.app.haven.dto.response.PricesResponse;
@@ -65,5 +66,11 @@ public class PricesController {
         PricesResponse pricesResponse = pricesService.updatePrices(id, request);
 
         return ResponseUtils.responseWithData("Price Updated", pricesResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public CommonResponse deletePrice(@PathVariable String id) {
+        pricesService.deletePrice(id);
+        return  ResponseUtils.response("Price Deleted");
     }
 }
