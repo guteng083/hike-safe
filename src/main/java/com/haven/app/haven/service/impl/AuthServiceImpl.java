@@ -116,13 +116,13 @@ public class AuthServiceImpl implements AuthService {
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 Map<String, List<String>> errors = new HashMap<>();
                 errors.put("Password", Collections.singletonList("password incorrect"));
-                throw new ValidationException("Register failed", errors);
+                throw new ValidationException("Change Password failed", errors);
             }
 
             if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                 Map<String, List<String>> errors = new HashMap<>();
                 errors.put("Password", Collections.singletonList("New Password and Confirm Password do not match"));
-                throw new ValidationException("Register failed", errors);
+                throw new ValidationException("Change Password failed", errors);
             }
 
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -131,6 +131,10 @@ public class AuthServiceImpl implements AuthService {
             LogUtils.logSuccess("AuthService", "changePassword");
         } catch (Exception e) {
             LogUtils.getError("AuthService.changePassword", e);
+            if(e instanceof ValidationException) {
+                throw new ValidationException("Change Password failed", ((ValidationException) e).getErrors());
+            }
+            throw new AuthenticationException("Change Password Failed");
         }
     }
 
