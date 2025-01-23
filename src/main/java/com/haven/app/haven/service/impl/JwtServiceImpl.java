@@ -9,6 +9,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
@@ -20,7 +21,8 @@ import java.util.function.Function;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private final String secretKey = "fasghdjkashdjkhsajkdhasjkbcjaskdjkasndkjashd";
+    @Value("${jwt.secret_key}")
+    protected String secretKey;
     @Override
     public String generateToken(Users users) {
         Map<String, Object> claims = new HashMap<>();
