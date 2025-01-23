@@ -54,6 +54,9 @@ public class AuthServiceImpl implements AuthService {
             LogUtils.logSuccess("AuthService", "registerAdmin");
         } catch (Exception e) {
             LogUtils.getError("AuthService.registerAdmin", e);
+            if(e instanceof ValidationException) {
+                throw new ValidationException("Register failed", ((ValidationException) e).getErrors());
+            }
         }
     }
 
@@ -65,6 +68,9 @@ public class AuthServiceImpl implements AuthService {
             LogUtils.logSuccess("AuthService", "registerStaff");
         } catch (Exception e) {
             LogUtils.getError("AuthService.registerStaff", e);
+            if(e instanceof ValidationException) {
+                throw new ValidationException("Register failed", ((ValidationException) e).getErrors());
+            }
         }
     }
 
@@ -76,6 +82,9 @@ public class AuthServiceImpl implements AuthService {
             LogUtils.logSuccess("AuthService", "registerCustomer");
         } catch (Exception e) {
             LogUtils.getError("AuthService.registerCustomer", e);
+            if(e instanceof ValidationException) {
+                throw new ValidationException("Register failed", ((ValidationException) e).getErrors());
+            }
         }
     }
 
